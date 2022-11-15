@@ -1,0 +1,10 @@
+{
+  "prettier.enable": false,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.rome": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "rome.rome"
+  },
+}
