@@ -1,5 +1,5 @@
 {
-  "name": "vue3-script-setup",
+  "name": "vue3-script-to-setup",
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@7.12.0",
@@ -7,9 +7,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/antfu/vue3-script-setup.git"
+    "url": "git+https://github.com/antfu/vue3-script-to-setup.git"
   },
-  "bugs": "https://github.com/antfu/vue3-script-setup/issues",
+  "bugs": "https://github.com/antfu/vue3-script-to-setup/issues",
   "keywords": [],
   "sideEffects": false,
   "exports": {
@@ -36,12 +36,15 @@
   "scripts": {
     "build": "unbuild",
     "dev": "unbuild --stub",
-    "lint": "eslint .",
+    "lint": "rome ci ./src",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "release-one": "standard-version -r major",
+    "release-two": "standard-version -r minor",
+    "release-three": "standard-version -r patch"
   },
   "devDependencies": {
     "@antfu/ni": "^0.18.0",
@@ -52,6 +55,7 @@
     "typescript": "^4.8.4",
     "unbuild": "^0.8.11",
     "vite": "^3.2.3",
-    "vitest": "^0.25.2"
+    "vitest": "^0.25.2",
+    "standard-version": "^9.5.0"
   }
 }

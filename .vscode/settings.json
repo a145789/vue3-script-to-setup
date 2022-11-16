@@ -1,5 +1,6 @@
 {
   "prettier.enable": false,
+  "eslint.enable": false,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.rome": true
@@ -7,4 +8,5 @@
   "[typescript]": {
     "editor.defaultFormatter": "rome.rome"
   },
+  "files.eol": "\n"
 }
