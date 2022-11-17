@@ -1,1 +1,5 @@
-export const two = 12;
+const getProcessArgv = () => {
+    const args = process.argv.slice(2).filter(Boolean);
+    console.log(args);
+  };
+  
