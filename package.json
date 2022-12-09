@@ -22,6 +22,9 @@
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "tosetup": "bin/tosetup.mjs"
+  },
   "typesVersions": {
     "*": {
       "*": [
@@ -42,23 +45,28 @@
     "start": "esno src/index.ts",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "release-one": "standard-version -r major",
-    "release-two": "standard-version -r minor",
-    "release-three": "standard-version -r patch"
+    "re-major": "standard-version -r major",
+    "re-minor": "standard-version -r minor",
+    "re-patch": "standard-version -r patch"
   },
   "devDependencies": {
-    "@antfu/ni": "^0.18.0",
-    "@types/node": "^18.11.9",
+    "@antfu/ni": "^0.18.8",
+    "@types/node": "^18.11.10",
     "bumpp": "^8.2.1",
     "esno": "^0.16.3",
     "rome": "^10.0.1",
     "standard-version": "^9.5.0",
-    "typescript": "^4.8.4",
-    "unbuild": "^0.8.11",
-    "vite": "^3.2.3",
-    "vitest": "^0.25.2"
+    "typescript": "^4.9.3",
+    "unbuild": "^1.0.1",
+    "vite": "^3.2.4",
+    "vitest": "^0.25.3",
+    "vue": "^3.2.45"
   },
   "dependencies": {
-    "find-up": "^6.3.0"
+    "@swc/core": "^1.3.21",
+    "colorette": "^2.0.19",
+    "fast-glob": "^3.2.12",
+    "find-up": "^6.3.0",
+    "unconfig": "^0.3.7"
   }
 }

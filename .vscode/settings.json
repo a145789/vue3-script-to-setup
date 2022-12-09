@@ -8,5 +8,11 @@
   "[typescript]": {
     "editor.defaultFormatter": "rome.rome"
   },
+  "[javascript]": {
+    "editor.defaultFormatter": "rome.rome"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
   "files.eol": "\n"
 }
