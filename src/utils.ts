@@ -1,29 +1,33 @@
 import fs from "fs";
-import path from "path";
+import { resolve } from "path";
 import fg from "fast-glob";
 import { loadConfig } from "unconfig";
 import type {
-  ArrowFunctionExpression,
   AssignmentPatternProperty,
   CallExpression,
   Expression,
   Identifier,
   KeyValuePatternProperty,
-  MethodProperty,
   Options,
   TsTypeReference,
 } from "@swc/core";
 import Visitor from "@swc/core/Visitor";
 import { yellow } from "colorette";
+import slash from "slash";
+import { SetupAst } from "./constants";
 
 export const cwd = process.cwd();
+
+export function pathResolve(...paths: string[]) {
+  return slash(resolve(...paths));
+}
 
 export function getTheFileAbsolutePath(...pathNames: string[]) {
   const lastFile = pathNames.at(-1) || "";
   if (!lastFile.endsWith(".vue")) {
     return;
   }
-  const absolutePath = path.resolve(cwd, ...pathNames);
+  const absolutePath = pathResolve(cwd, ...pathNames);
   try {
     fs.accessSync(absolutePath, fs.constants.F_OK);
     return absolutePath;
@@ -59,12 +63,13 @@ export async function useConfigPath(files: string, beginDir = cwd) {
     const files = Array.isArray(item)
       ? item
       : [typeof item === "string" ? item : item.mode];
-    let vueFiles = getFgVueFile(files.map((p) => path.resolve(cwd, key, p)));
+    let vueFiles = getFgVueFile(files.map((p) => pathResolve(cwd, key, p)));
+
     if (typeof item === "object" && !Array.isArray(item)) {
       const excludes = Array.isArray(item.excludes)
         ? item.excludes
         : [item.excludes];
-      const excludePaths = excludes.map((p) => path.resolve(cwd, key, p));
+      const excludePaths = excludes.map((p) => pathResolve(cwd, key, p));
 
       vueFiles = vueFiles.filter((p) => !excludePaths.includes(p));
     }
@@ -133,7 +138,7 @@ export function getPropsValueIdentifier(
 
 export function getSetupHasSecondParams(
   key: "attrs" | "slots" | "emit" | "expose",
-  setupAst: ArrowFunctionExpression | MethodProperty,
+  setupAst: SetupAst,
 ) {
   if (!(setupAst.params.length || setupAst.params[1])) {
     return;
@@ -202,9 +207,7 @@ export class GetCallExpressionFirstArg extends Visitor {
     return n;
   }
 
-  visitFn(
-    n: ArrowFunctionExpression | MethodProperty,
-  ): ArrowFunctionExpression | MethodProperty {
+  visitFn(n: SetupAst): SetupAst {
     switch (n.type) {
       case "ArrowFunctionExpression":
         this.visitArrowFunctionExpression(n);

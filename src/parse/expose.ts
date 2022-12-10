@@ -1,13 +1,8 @@
-import type { ArrowFunctionExpression, MethodProperty } from "@swc/core";
-import { Config } from "../constants";
+import { Config, SetupAst } from "../constants";
 import Visitor from "@swc/core/Visitor";
 import { GetCallExpressionFirstArg, getSetupHasSecondParams } from "../utils";
 
-function transformExpose(
-  _: null,
-  setupAst: ArrowFunctionExpression | MethodProperty,
-  config: Config,
-) {
+function transformExpose(_: null, setupAst: SetupAst, config: Config) {
   const { setupScript } = config;
   const name = getSetupHasSecondParams("expose", setupAst);
   if (!name) {

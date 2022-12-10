@@ -1,7 +1,7 @@
-import { resolve } from "path";
 import { describe, expect, it } from "vitest";
 import {
   cwd,
+  pathResolve,
   getSwcOptions,
   getTheFileAbsolutePath,
   MapVisitor,
@@ -33,29 +33,35 @@ describe("test utils", () => {
     expect(getTheFileAbsolutePath("foo.js")).toBeUndefined();
     expect(getTheFileAbsolutePath("./example/src/Foo.vue")).toBeUndefined();
     expect(getTheFileAbsolutePath("./example/src/App.vue")).toBe(
-      resolve(cwd, "./example/src/App.vue"),
+      pathResolve(cwd, "./example/src/App.vue"),
     );
     expect(getTheFileAbsolutePath(cwd, "./example", "src", "App.vue")).toBe(
-      resolve(cwd, "./example/src/App.vue"),
+      pathResolve(cwd, "./example/src/App.vue"),
     );
   });
 
   it("test useConfigPath", async () => {
     expect(
-      await useConfigPath("tosetup.config.a", resolve(__dirname, "fixtures")),
+      await useConfigPath(
+        "tosetup.config.a",
+        pathResolve(__dirname, "fixtures"),
+      ),
     ).toEqual([
-      resolve(cwd, "./example/src/App.vue"),
-      resolve(cwd, "./example/src/components/Tab.vue"),
-      resolve(cwd, "example/src/views/404.vue"),
+      pathResolve(cwd, "./example/src/App.vue"),
+      pathResolve(cwd, "./example/src/components/Tab.vue"),
+      pathResolve(cwd, "example/src/views/404.vue"),
     ]);
 
     expect(
       (
-        await useConfigPath("tosetup.config.b", resolve(__dirname, "fixtures"))
+        await useConfigPath(
+          "tosetup.config.b",
+          pathResolve(__dirname, "fixtures"),
+        )
       ).sort(),
     ).toEqual(
       fg
-        .sync(resolve(cwd, "./example/src/**"))
+        .sync(pathResolve(cwd, "./example/src/**"))
         .filter((path) => !path.endsWith("views/Home.vue"))
         .sort(),
     );
@@ -97,13 +103,13 @@ describe("test parse", () => {
   });
 
   it("test transformProps props name", () => {
-    const { script, propsAst, init } = getPropsAst("identifier");
+    const { script, ast, init } = getPropsAst("identifier");
 
     expect(
       transformProps(init, setupHasParams, {
         script,
         fileType: FileType.js,
-        offset: propsAst.span.start,
+        offset: ast.span.start,
         fileAbsolutePath: "",
       }),
     ).toBe("const props = defineProps(myProps)");
@@ -112,20 +118,20 @@ describe("test parse", () => {
       transformProps(init, setupNoParams, {
         script,
         fileType: FileType.js,
-        offset: propsAst.span.start,
+        offset: ast.span.start,
         fileAbsolutePath: "",
       }),
     ).toBe("defineProps(myProps)");
   });
 
   it("test transformProps array", () => {
-    const { script, propsAst, init } = getPropsAst("array");
+    const { script, ast, init } = getPropsAst("array");
 
     expect(
       transformProps(init, setupHasParams, {
         script,
         fileType: FileType.js,
-        offset: propsAst.span.start,
+        offset: ast.span.start,
         fileAbsolutePath: "",
       }),
     ).toBe("const props = defineProps(['foo', 'bar'])");
@@ -133,14 +139,14 @@ describe("test parse", () => {
 
   it("test transformProps normal object props", () => {
     function validator() {
-      const { script, propsAst, init } = getPropsAst("validator");
+      const { script, ast, init } = getPropsAst("validator");
 
       expect(
         transformToSingeLine(
           transformProps(init, setupHasParams, {
             script,
             fileType: FileType.ts,
-            offset: propsAst.span.start,
+            offset: ast.span.start,
             fileAbsolutePath: "",
           }),
         ),
@@ -163,14 +169,14 @@ describe("test parse", () => {
     validator();
 
     function normal() {
-      const { script, propsAst, init } = getPropsAst("normal");
+      const { script, ast, init } = getPropsAst("normal");
 
       expect(
         transformToSingeLine(
           transformProps(init, setupNoParams, {
             script,
             fileType: FileType.js,
-            offset: propsAst.span.start,
+            offset: ast.span.start,
             fileAbsolutePath: "",
           }),
         ),
@@ -201,14 +207,14 @@ describe("test parse", () => {
   });
 
   it("test transformProps ts object", () => {
-    const { script, propsAst, init } = getPropsAst("normal");
+    const { script, ast, init } = getPropsAst("normal");
 
     expect(
       transformToSingeLine(
         transformProps(init, setupHasParams, {
           script,
           fileType: FileType.ts,
-          offset: propsAst.span.start,
+          offset: ast.span.start,
           fileAbsolutePath: "",
         }),
       ),
@@ -221,13 +227,13 @@ describe("test parse", () => {
 
   it("test transformComponent", () => {
     function object() {
-      const { script, componentsAst, init } = getComponentsAst("object");
+      const { script, ast, init } = getComponentsAst("object");
       expect(
         transformToSingeLine(
           transformComponents(init, setupHasParams, {
             script,
             fileType: FileType.ts,
-            offset: componentsAst.span.start,
+            offset: ast.span.start,
             fileAbsolutePath: "",
           }),
         ),
@@ -240,13 +246,13 @@ describe("test parse", () => {
     object();
 
     function array() {
-      const { script, componentsAst, init } = getComponentsAst("array");
+      const { script, ast, init } = getComponentsAst("array");
       expect(
         transformToSingeLine(
           transformComponents(init, setupHasParams, {
             script,
             fileType: FileType.ts,
-            offset: componentsAst.span.start,
+            offset: ast.span.start,
             fileAbsolutePath: "",
           }),
         ),
@@ -256,12 +262,12 @@ describe("test parse", () => {
   });
 
   it("test transformDirectives", () => {
-    const { script, directivesAst, init } = getDirectivesAst();
+    const { script, ast, init } = getDirectivesAst();
 
     const directives = transformDirectives(init, setupHasParams, {
       script,
       fileType: FileType.ts,
-      offset: directivesAst.span.start,
+      offset: ast.span.start,
       fileAbsolutePath: "",
     });
 
@@ -295,13 +301,13 @@ describe("test parse", () => {
 
   it("test transformEmits", () => {
     function noParams() {
-      const { script, emitsAst, init } = getEmitsAst("array");
+      const { script, ast, init } = getEmitsAst("array");
       expect(
         transformToSingeLine(
           transformEmits(init, setupNoParams, {
             script,
             fileType: FileType.ts,
-            offset: emitsAst.span.start,
+            offset: ast.span.start,
             fileAbsolutePath: "",
           }),
         ),
@@ -310,13 +316,13 @@ describe("test parse", () => {
     noParams();
 
     function objectEmits() {
-      const { script, emitsAst, init } = getEmitsAst("object");
+      const { script, ast, init } = getEmitsAst("object");
       expect(
         transformToSingeLine(
           transformEmits(init, setupHasParams, {
             script,
             fileType: FileType.ts,
-            offset: emitsAst.span.start,
+            offset: ast.span.start,
             fileAbsolutePath: "",
           }),
         ),
@@ -325,13 +331,13 @@ describe("test parse", () => {
     objectEmits();
 
     function arrayEmits() {
-      const { script, emitsAst, init } = getEmitsAst("array");
+      const { script, ast, init } = getEmitsAst("array");
       expect(
         transformToSingeLine(
           transformEmits(init, setupHasParams, {
             script,
             fileType: FileType.ts,
-            offset: emitsAst.span.start,
+            offset: ast.span.start,
             setupScript,
             fileAbsolutePath: "",
           }),
@@ -346,7 +352,7 @@ describe("test parse", () => {
   });
 
   it("test transformAttrsAndSlots", () => {
-    const { script } = getAttrsAndSlotsAst();
+    const { script, ast } = getAttrsAndSlotsAst();
 
     const attrsAndSlots = transformAttrsAndSlots(null, setupHasParams, {
       script,
@@ -356,7 +362,7 @@ describe("test parse", () => {
     });
 
     if (attrsAndSlots) {
-      const { str, visitCb } = attrsAndSlots;
+      const { str, getMagicString } = attrsAndSlots;
       expect(transformToSingeLine(str)).toBe(
         transformToSingeLine(`
         const attrs = useAttrs();
@@ -364,23 +370,13 @@ describe("test parse", () => {
         `),
       );
 
-      const { code } = transformSync(
-        `${script}\n${str}`,
-        getSwcOptions(new MapVisitor([visitCb])),
-      );
+      const code = getMagicString(ast, script);
 
       expect(transformToSingeLine(code)).toBe(
         transformToSingeLine(`
-          import vFocus from "focus";
-          import { tap as vCustomTap, drag as vDrag } from "./directives";
-          var options = {
-              directives: {
-                  vFocus,
-                  vCustomTap,
-                  vDrag,
-                  customDir: {}
-              }
-          };
+          import { ref, useAttrs, useSlots, } from "vue";
+          useAttrs();
+          useSlots();
         `),
       );
     }

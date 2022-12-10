@@ -87,11 +87,11 @@ export function getPropsAst(
     default:
       break;
   }
-  const propsAst = parseSync(script, parseOption) as any;
+  const ast = parseSync(script, parseOption) as any;
   return {
     script,
-    propsAst,
-    init: propsAst.body[0].declarations[0].init,
+    ast,
+    init: ast.body[0].declarations[0].init,
   };
 }
 
@@ -109,12 +109,12 @@ export function getComponentsAst(type: "object" | "array") {
   const script = (
     type === "object" ? objectComponents : arrayComponents
   ).trim();
-  const componentsAst = parseSync(script, parseOption) as any;
+  const ast = parseSync(script, parseOption) as any;
 
   return {
     script,
-    componentsAst,
-    init: componentsAst.body[0].declarations[0].init,
+    ast,
+    init: ast.body[0].declarations[0].init,
   };
 }
 
@@ -134,12 +134,12 @@ var options = {
 
 export function getDirectivesAst() {
   const script = directives.trim();
-  const directivesAst = parseSync(script, parseOption) as any;
+  const ast = parseSync(script, parseOption) as any;
 
   return {
     script,
-    directivesAst,
-    init: directivesAst.body[2].declarations[0].init.properties[0].value,
+    ast,
+    init: ast.body[2].declarations[0].init.properties[0].value,
   };
 }
 
@@ -156,12 +156,12 @@ var emits = ['a', 'b', 'c']
 `;
 export function getEmitsAst(type: "object" | "array") {
   const script = (type === "object" ? objectEmits : arrayEmits).trim();
-  const emitsAst = parseSync(script, parseOption) as any;
+  const ast = parseSync(script, parseOption) as any;
 
   return {
     script,
-    emitsAst,
-    init: emitsAst.body[0].declarations[0].init,
+    ast,
+    init: ast.body[0].declarations[0].init,
   };
 }
 
@@ -170,8 +170,9 @@ import { ref } from "vue";
 `;
 export function getAttrsAndSlotsAst() {
   const script = attrsAndSlots.trim();
-
+  const ast = parseSync(script, parseOption) as any;
   return {
     script,
+    ast,
   };
 }

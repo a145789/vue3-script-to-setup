@@ -1,4 +1,8 @@
-import type { ParseOptions } from "@swc/core";
+import type {
+  ParseOptions,
+  ArrowFunctionExpression,
+  MethodProperty,
+} from "@swc/core";
 
 export const enum FileType {
   js,
@@ -18,3 +22,5 @@ export const parseOption = {
   syntax: "typescript",
   comments: true,
 } as ParseOptions;
+
+export type SetupAst = ArrowFunctionExpression | MethodProperty;
