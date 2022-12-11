@@ -8,8 +8,7 @@ import {
   useConfigPath,
 } from "../src/utils";
 import fg from "fast-glob";
-import filterOptions from "../src/parse/filter-options";
-import transformProps from "../src/parse/props";
+import transformProps from "../src/transform/props";
 import { FileType } from "../src/constants";
 import {
   getAttrsAndSlotsAst,
@@ -20,12 +19,13 @@ import {
   getSetupFnAst,
   transformToSingeLine,
 } from "./utils";
-import transformComponents from "../src/parse/components";
-import transformDirectives from "../src/parse/directives";
-import transformEmits from "../src/parse/emits";
+import transformComponents from "../src/transform/components";
+import transformDirectives from "../src/transform/directives";
+import transformEmits from "../src/transform/emits";
 import { transformSync } from "@swc/core";
-import transformAttrsAndSlots from "../src/parse/attrsAndSlots";
-import transformExpose from "../src/parse/expose";
+import transformAttrsAndSlots from "../src/transform/attrsAndSlots";
+import transformExpose from "../src/transform/expose";
+import transformScript from "../src/transform/transformScript";
 
 describe("test utils", () => {
   it("test getTheFileAbsolutePath", () => {
@@ -42,64 +42,77 @@ describe("test utils", () => {
 
   it("test useConfigPath", async () => {
     expect(
-      await useConfigPath(
-        "tosetup.config.a",
-        pathResolve(__dirname, "fixtures"),
-      ),
+      (
+        await useConfigPath(
+          "tosetup.config.a",
+          pathResolve(__dirname, "fixtures"),
+        )
+      ).pathNames,
     ).toEqual([
       pathResolve(cwd, "./example/src/App.vue"),
       pathResolve(cwd, "./example/src/components/Tab.vue"),
       pathResolve(cwd, "example/src/views/404.vue"),
     ]);
 
-    expect(
-      (
-        await useConfigPath(
-          "tosetup.config.b",
-          pathResolve(__dirname, "fixtures"),
-        )
-      ).sort(),
-    ).toEqual(
+    const { pathNames, option } = await useConfigPath(
+      "tosetup.config.b",
+      pathResolve(__dirname, "fixtures"),
+    );
+    expect(pathNames.sort()).toEqual(
       fg
         .sync(pathResolve(cwd, "./example/src/**"))
         .filter((path) => !path.endsWith("views/Home.vue"))
         .sort(),
     );
+
+    expect(option).toEqual({
+      propsNotOnlyTs: true,
+    });
   });
 });
 
-describe("test parse", () => {
+describe("test transform", () => {
   const { expression: setupHasParams, script: setupScript } =
     getSetupFnAst("has");
   const { expression: setupNoParams } = getSetupFnAst("none");
-  const defineComponentScript = `
-  import { defineComponent } from 'vue'
-  export default defineComponent({
-    name: 'App',
-      data:
-        ()=>{},
-      setup() {
-        return { }
+
+  it("test transformScript", () => {
+    const script = `
+    import { defineComponent, PropType, ref } from "vue"
+    import Header from "../components/Header.vue"
+    import Tab from "../components/Tab.vue"
+    import touchdir from "vtouchdir"
+    export default defineComponent({
+      name: 'App',
+      components: {
+        Header,
+        Tab,
+      },
+      directives: {
+        force: {},
+        touchdir,
+      },
+      props: {
+        items: Array as PropType<number[]>
+      },
+      emit: ["click"],
+      setup(props, { emit, attrs, slots: mySlots, expose }) {
+        const bar = ref(0)
+        expose({ bar })
+        emit("change");
+        return {
+          bar
+        }
       }
-  })
-  `;
-  const objectScript = `
-  export default {
-    props: {
-      
-    },
-      setup() {
-        const obj = { data: {} }
-        return obj
-      }
-  }
-  `;
-  it("test filterOptions", () => {
-    // const a = filterOptions({
-    //   script: defineComponentScript,
-    //   fileType: FileType.js,
-    // });
-    // const b = filterOptions({ script: objectScript, fileType: FileType.js });
+    })
+    `;
+    const code = transformScript({
+      fileType: FileType.ts,
+      script: script.trim(),
+      offset: 0,
+      fileAbsolutePath: "",
+      setupScript: "",
+    });
   });
 
   it("test transformProps props name", () => {

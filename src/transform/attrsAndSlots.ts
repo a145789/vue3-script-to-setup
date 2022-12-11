@@ -4,13 +4,10 @@ import type {
   Program,
   ModuleItem,
 } from "@swc/core";
-import { Config, SetupAst } from "../constants";
+import { Config, SetupAst, USE_ATTRS, USE_SLOTS } from "../constants";
 import Visitor from "@swc/core/Visitor";
-import { getSetupHasSecondParams } from "../utils";
+import { getSetupSecondParams } from "../utils";
 import MagicString from "magic-string";
-
-const USE_ATTRS = "useAttrs" as const;
-const USE_SLOTS = "useSlots" as const;
 
 class MyVisitor extends Visitor {
   private ms: MagicString;
@@ -100,11 +97,15 @@ function getMagicString(ast: Program, script: string) {
   return ms.toString();
 }
 
-function transformAttrsAndSlots(_: null, setupAst: SetupAst, _config: Config) {
-  const attrsName = getSetupHasSecondParams("attrs", setupAst);
-  const slotsName = getSetupHasSecondParams("slots", setupAst);
+function transformAttrsAndSlots(
+  _: null,
+  setupAst: SetupAst,
+  { fileAbsolutePath }: Config,
+) {
+  const attrsName = getSetupSecondParams("attrs", setupAst, fileAbsolutePath);
+  const slotsName = getSetupSecondParams("slots", setupAst, fileAbsolutePath);
   if (!(attrsName || slotsName)) {
-    return;
+    return null;
   }
 
   const str = `${attrsName ? `const ${attrsName} = useAttrs();\n` : ""}${

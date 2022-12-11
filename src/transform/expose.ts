@@ -1,10 +1,10 @@
 import { Config, SetupAst } from "../constants";
 import Visitor from "@swc/core/Visitor";
-import { GetCallExpressionFirstArg, getSetupHasSecondParams } from "../utils";
+import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
 
 function transformExpose(_: null, setupAst: SetupAst, config: Config) {
-  const { setupScript } = config;
-  const name = getSetupHasSecondParams("expose", setupAst);
+  const { setupScript, fileAbsolutePath } = config;
+  const name = getSetupSecondParams("expose", setupAst, fileAbsolutePath);
   if (!name) {
     return null;
   }

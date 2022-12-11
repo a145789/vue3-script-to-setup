@@ -13,7 +13,7 @@ function transformProps(
   setupAst: SetupAst,
   config: Config,
 ) {
-  const { script, offset, fileType } = config;
+  const { script, offset, fileType, propsNotOnlyTs } = config;
 
   let preCode = "";
   if (setupAst.params.length) {
@@ -46,6 +46,7 @@ function transformProps(
   }
 
   const isNormalProps =
+    propsNotOnlyTs ||
     fileType !== FileType.ts ||
     propsAst.properties.some(
       (ast) =>

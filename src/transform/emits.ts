@@ -1,15 +1,15 @@
 import type { Identifier, ArrayExpression, ObjectExpression } from "@swc/core";
 
 import { Config, SetupAst } from "../constants";
-import { GetCallExpressionFirstArg, getSetupHasSecondParams } from "../utils";
+import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
 
 function transformEmits(
   emitsAst: ArrayExpression | ObjectExpression | Identifier,
   setupAst: SetupAst,
   config: Config,
 ) {
-  const { script, offset, setupScript } = config;
-  const name = getSetupHasSecondParams("emit", setupAst);
+  const { script, offset, setupScript, fileAbsolutePath } = config;
+  const name = getSetupSecondParams("emit", setupAst, fileAbsolutePath);
   if (!name) {
     return "";
   }

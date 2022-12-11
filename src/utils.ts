@@ -8,13 +8,14 @@ import type {
   Expression,
   Identifier,
   KeyValuePatternProperty,
+  ObjectPattern,
   Options,
   TsTypeReference,
 } from "@swc/core";
 import Visitor from "@swc/core/Visitor";
-import { yellow } from "colorette";
+import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
-import { SetupAst } from "./constants";
+import { DefaultOption, SetupAst } from "./constants";
 
 export const cwd = process.cwd();
 
@@ -32,23 +33,14 @@ export function getTheFileAbsolutePath(...pathNames: string[]) {
     fs.accessSync(absolutePath, fs.constants.F_OK);
     return absolutePath;
   } catch {
-    console.warn(yellow(`File ${absolutePath} cannot be accessed.`));
+    output.warn(`File ${absolutePath} cannot be accessed.`);
     return;
   }
 }
 
-type Config = {
-  [key: string]:
-    | string
-    | string[]
-    | {
-        mode: "*" | "**";
-        excludes: string | string[];
-      };
-};
 export async function useConfigPath(files: string, beginDir = cwd) {
   const pathNames: string[] = [];
-  const { config } = await loadConfig<Config>({
+  const { config } = await loadConfig<DefaultOption>({
     sources: {
       files,
       extensions: ["ts", "js"],
@@ -56,10 +48,11 @@ export async function useConfigPath(files: string, beginDir = cwd) {
     cwd: beginDir,
   });
 
-  const keys = Object.keys(config);
+  const { path, ...option } = config;
+  const keys = Object.keys(path);
 
   for (const key of keys) {
-    const item = config[key];
+    const item = path[key];
     const files = Array.isArray(item)
       ? item
       : [typeof item === "string" ? item : item.mode];
@@ -76,15 +69,15 @@ export async function useConfigPath(files: string, beginDir = cwd) {
     pathNames.push(...vueFiles);
   }
 
-  return pathNames;
+  return { pathNames, option };
 }
 
 function getFgVueFile(paths: string[]) {
   return fg.sync(paths).filter((p) => p.endsWith(".vue"));
 }
 
-export function defineConfig(config: Config) {
-  return config;
+export function defineConfig(option: DefaultOption) {
+  return option;
 }
 
 export function getPropsValueIdentifier(
@@ -136,29 +129,41 @@ export function getPropsValueIdentifier(
   return "";
 }
 
-export function getSetupHasSecondParams(
+export function getSetupSecondParams(
   key: "attrs" | "slots" | "emit" | "expose",
   setupAst: SetupAst,
+  fileAbsolutePath: string,
 ) {
   if (!(setupAst.params.length || setupAst.params[1])) {
     return;
   }
 
   const [_, setupParamsAst] = setupAst.params;
-  if (setupParamsAst.type !== "ObjectPattern") {
-    console.warn("");
+
+  if (
+    setupParamsAst.type !== "ObjectPattern" &&
+    setupParamsAst.type !== "Parameter"
+  ) {
+    output.warn(
+      `The second argument to the setup function is not an object and cannot be resolved in the ${fileAbsolutePath}`,
+    );
     return;
   }
-  if (setupParamsAst.properties.some((ast) => ast.type === "RestElement")) {
-    console.warn("");
+
+  const { properties } =
+    setupParamsAst.type === "ObjectPattern"
+      ? setupParamsAst
+      : (setupParamsAst.pat as ObjectPattern);
+
+  if (properties.some((ast) => ast.type === "RestElement")) {
+    output.warn(
+      `The second argument to the setup function has rest element(...rest) and cannot be resolved in the ${fileAbsolutePath}`,
+    );
     return;
   }
 
   const nameAst = (
-    setupParamsAst.properties as (
-      | AssignmentPatternProperty
-      | KeyValuePatternProperty
-    )[]
+    properties as (AssignmentPatternProperty | KeyValuePatternProperty)[]
   ).find((ast) => (ast.key as Identifier).value === key);
   if (!nameAst) {
     return;
@@ -248,3 +253,10 @@ export function getSwcOptions(plugin: Visitor): Options {
     plugin: (n) => plugin.visitProgram(n),
   };
 }
+
+export const output = {
+  warn: (message: string) => console.log(yellow(message)),
+  error: (message: string) => console.log(red(message)),
+  log: (message: string) => console.log(blue(message)),
+  success: (message: string) => console.log(green(message)),
+};

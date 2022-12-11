@@ -9,12 +9,28 @@ export const enum FileType {
   ts,
 }
 
+export interface DefaultOption {
+  propsNotOnlyTs?: boolean;
+  notUseNewFile?: boolean;
+  path: {
+    [key: string]:
+      | string
+      | string[]
+      | {
+          mode: "*" | "**";
+          excludes: string | string[];
+        };
+  };
+}
+
+export type CommandsOption = Omit<DefaultOption, "path">;
 export interface Config {
   fileType: FileType;
   script: string;
   offset: number;
-  setupScript?: string;
   fileAbsolutePath: string;
+  propsNotOnlyTs?: boolean;
+  setupScript?: string;
 }
 
 export const parseOption = {
@@ -24,3 +40,6 @@ export const parseOption = {
 } as ParseOptions;
 
 export type SetupAst = ArrowFunctionExpression | MethodProperty;
+
+export const USE_ATTRS = "useAttrs" as const;
+export const USE_SLOTS = "useSlots" as const;

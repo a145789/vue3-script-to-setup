@@ -1,7 +1,7 @@
 import type { Identifier, ObjectExpression } from "@swc/core";
 import { Config, SetupAst } from "../constants";
 import type Visitor from "@swc/core/Visitor";
-import { yellow } from "colorette";
+import { output } from "../utils";
 
 function transformDirectiveName(name: string) {
   return `v${name.slice(0, 1).toLocaleUpperCase() + name.slice(1)}`;
@@ -17,10 +17,8 @@ function transformDirectives(
     directivesAst.type === "Identifier" ||
     directivesAst.properties.some((ast) => ast.type === "SpreadElement")
   ) {
-    console.warn(
-      yellow(
-        `Please manually modify the custom directives in ${fileAbsolutePath}.`,
-      ),
+    output.warn(
+      `Please manually modify the custom directives in ${fileAbsolutePath}.`,
     );
     return null;
   }
