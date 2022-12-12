@@ -145,7 +145,7 @@ export function transformToSingeLine(str: string | undefined | null) {
   if (!str) {
     return "";
   }
-  return str.replaceAll(/\s|,|;|"|'/g, "");
+  return str.replace(/\s|,|;|"|'/g, "");
 }
 
 const objectEmits = `

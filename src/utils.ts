@@ -24,7 +24,7 @@ export function pathResolve(...paths: string[]) {
 }
 
 export function getTheFileAbsolutePath(...pathNames: string[]) {
-  const lastFile = pathNames.at(-1) || "";
+  const lastFile = pathNames[pathNames.length - 1] || "";
   if (!lastFile.endsWith(".vue")) {
     return;
   }
