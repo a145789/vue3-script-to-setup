@@ -15,7 +15,7 @@ import type {
 import Visitor from "@swc/core/Visitor";
 import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
-import { DefaultOption, SetupAst } from "./constants";
+import { DefaultOption, SetupAst, VisitorCb } from "./constants";
 
 export const cwd = process.cwd();
 
@@ -175,7 +175,7 @@ export function getSetupSecondParams(
 }
 
 export class MapVisitor extends Visitor {
-  constructor(visitCb: Partial<Visitor>[]) {
+  constructor(visitCb: VisitorCb[]) {
     super();
     const keys = [
       ...new Set(visitCb.flatMap((item) => Object.keys(item))),
@@ -184,7 +184,7 @@ export class MapVisitor extends Visitor {
     for (const key of keys) {
       this[key] = (n: any) => {
         for (const visit of visitCb) {
-          n = (visit[key] as any)?.call(this, n);
+          n = (visit[key] as any)?.call(this, n) || n;
         }
         return n;
       };
@@ -226,7 +226,7 @@ export class GetCallExpressionFirstArg extends Visitor {
   }
 }
 
-export function getSwcOptions(plugin: Visitor): Options {
+export function getSwcOptions(plugin?: Visitor): Options {
   return {
     jsc: {
       parser: {
@@ -250,7 +250,7 @@ export function getSwcOptions(plugin: Visitor): Options {
     minify: false,
     isModule: true,
     inlineSourcesContent: true,
-    plugin: (n) => plugin.visitProgram(n),
+    plugin: plugin ? (n) => plugin.visitProgram(n) : undefined,
   };
 }
 

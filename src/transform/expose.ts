@@ -1,8 +1,8 @@
-import { Config, SetupAst } from "../constants";
-import Visitor from "@swc/core/Visitor";
+import { Config, SetupAst, VisitorCb } from "../constants";
 import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
+import { Statement } from "@swc/core";
 
-function transformExpose(_: null, setupAst: SetupAst, config: Config) {
+function transformExpose(setupAst: SetupAst, config: Config) {
   const { setupScript, fileAbsolutePath } = config;
   const name = getSetupSecondParams("expose", setupAst, fileAbsolutePath);
   if (!name) {
@@ -35,28 +35,41 @@ function transformExpose(_: null, setupAst: SetupAst, config: Config) {
 
   const str = `const ${name} = defineExpose({${exposeArg.join(",")}});`;
 
-  const visitCb: Partial<Visitor> = {
+  const visitCb: VisitorCb = {
     visitMethodProperty(n) {
+      n.key = this.visitPropertyName!(n.key);
+      if (n.body) {
+        n.body = this.visitBlockStatement!(n.body);
+      }
+      n.decorators = this.visitDecorators!(n.decorators);
+      n.params = this.visitParameters!(n.params);
+      n.returnType = this.visitTsTypeAnnotation!(n.returnType);
+      n.typeParameters = this.visitTsTypeParameterDeclaration!(
+        n.typeParameters,
+      );
       if (n.key.type === "Identifier" && n.key.value === "setup") {
         if (n.body) {
-          n.body.stmts = this.visitStatements!(n.body.stmts);
+          n.body.stmts = this.myVisitStatements(n.body.stmts);
         }
       }
+
       return n;
     },
     visitKeyValueProperty(n) {
+      n.key = this.visitPropertyName!(n.key);
+      n.value = this.visitExpression!(n.value);
       if (
         n.key.type === "Identifier" &&
         n.key.value === "setup" &&
         n.value.type === "ArrowFunctionExpression"
       ) {
         if (n.value.body.type === "BlockStatement") {
-          n.value.body.stmts = this.visitStatements!(n.value.body.stmts);
+          n.value.body.stmts = this.myVisitStatements(n.value.body.stmts);
         }
       }
       return n;
     },
-    visitStatements(stmts) {
+    myVisitStatements(stmts: Statement[]): Statement[] {
       return stmts.filter(
         (stmt) =>
           !(

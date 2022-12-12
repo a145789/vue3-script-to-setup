@@ -3,11 +3,34 @@ import type {
   ImportDeclaration,
   Program,
   ModuleItem,
+  TsType,
 } from "@swc/core";
 import { Config, SetupAst, USE_ATTRS, USE_SLOTS } from "../constants";
 import Visitor from "@swc/core/Visitor";
 import { getSetupSecondParams } from "../utils";
 import MagicString from "magic-string";
+
+function transformAttrsAndSlots(
+  setupAst: SetupAst,
+  { fileAbsolutePath }: Config,
+) {
+  const attrsName = getSetupSecondParams("attrs", setupAst, fileAbsolutePath);
+  const slotsName = getSetupSecondParams("slots", setupAst, fileAbsolutePath);
+  if (!(attrsName || slotsName)) {
+    return null;
+  }
+
+  const str = `${attrsName ? `const ${attrsName} = useAttrs();\n` : ""}${
+    slotsName ? `const ${slotsName} = useSlots();\n` : ""
+  }`;
+
+  return {
+    getMagicString,
+    str,
+  };
+}
+
+export default transformAttrsAndSlots;
 
 class MyVisitor extends Visitor {
   private ms: MagicString;
@@ -73,7 +96,7 @@ class MyVisitor extends Visitor {
   }
 
   visitModuleItems(items: ModuleItem[]) {
-    items.map(this.visitModuleItem.bind(this));
+    items = items.map(this.visitModuleItem.bind(this));
     const { ms, isHas, offset } = this;
 
     const end = items[items.length - 1]?.span.end ?? offset;
@@ -86,6 +109,10 @@ class MyVisitor extends Visitor {
     );
     return items;
   }
+
+  visitTsType(n: TsType) {
+    return n;
+  }
 }
 
 function getMagicString(ast: Program, script: string) {
@@ -96,26 +123,3 @@ function getMagicString(ast: Program, script: string) {
 
   return ms.toString();
 }
-
-function transformAttrsAndSlots(
-  _: null,
-  setupAst: SetupAst,
-  { fileAbsolutePath }: Config,
-) {
-  const attrsName = getSetupSecondParams("attrs", setupAst, fileAbsolutePath);
-  const slotsName = getSetupSecondParams("slots", setupAst, fileAbsolutePath);
-  if (!(attrsName || slotsName)) {
-    return null;
-  }
-
-  const str = `${attrsName ? `const ${attrsName} = useAttrs();\n` : ""}${
-    slotsName ? `const ${slotsName} = useSlots();\n` : ""
-  }`;
-
-  return {
-    getMagicString,
-    str,
-  };
-}
-
-export default transformAttrsAndSlots;

@@ -1,6 +1,5 @@
 import type { Identifier, ObjectExpression } from "@swc/core";
-import { Config, SetupAst } from "../constants";
-import type Visitor from "@swc/core/Visitor";
+import { Config, SetupAst, VisitorCb } from "../constants";
 import { output } from "../utils";
 
 function transformDirectiveName(name: string) {
@@ -51,8 +50,10 @@ function transformDirectives(
     return p;
   }, "")}`;
 
-  const visitCb: Partial<Visitor> = {
+  const visitCb: VisitorCb = {
     visitImportDefaultSpecifier(n) {
+      n.local = this.visitBindingIdentifier!(n.local);
+
       const { value } = n.local;
       if (importDirective.includes(value)) {
         n.local.value = transformDirectiveName(value);
@@ -61,6 +62,11 @@ function transformDirectives(
     },
 
     visitNamedImportSpecifier(n) {
+      n.local = this.visitBindingIdentifier!(n.local);
+      if (n.imported) {
+        n.imported = this.visitModuleExportName!(n.imported);
+      }
+
       const { local, imported } = n;
       if (!imported) {
         if (importDirective.includes(local.value)) {
@@ -80,6 +86,8 @@ function transformDirectives(
     },
 
     visitKeyValueProperty(n) {
+      n.key = this.visitPropertyName!(n.key);
+      n.value = this.visitExpression!(n.value);
       if (
         n.key.type === "Identifier" &&
         n.key.value === "directives" &&
@@ -94,6 +102,10 @@ function transformDirectives(
           }
         }
       }
+      return n;
+    },
+
+    visitTsType(n) {
       return n;
     },
   };

@@ -3,6 +3,7 @@ import type {
   ArrowFunctionExpression,
   MethodProperty,
 } from "@swc/core";
+import type { Visitor } from "@swc/core/Visitor";
 
 export const enum FileType {
   js,
@@ -43,3 +44,7 @@ export type SetupAst = ArrowFunctionExpression | MethodProperty;
 
 export const USE_ATTRS = "useAttrs" as const;
 export const USE_SLOTS = "useSlots" as const;
+
+export interface VisitorCb extends Partial<Visitor> {
+  [key: string]: any;
+}

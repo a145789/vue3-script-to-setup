@@ -3,10 +3,10 @@ import { parseOption } from "../src/constants";
 
 const setupHasParams = `
   (props, { emit: cEmit, attrs, slots: cSlots, expose }) => {
+    expose({ a, b: foo, })
     const foo = ref(0)
     cEmit('change');
-    cEmit("click", foo); 
-    expose({ a, b: foo, })
+    cEmit("click", foo);
     every("hello");
     expose({ count: publicCount });
     expose({ ...form })
@@ -65,31 +65,31 @@ var props = {
 export function getPropsAst(
   type: "array" | "identifier" | "normal" | "validator",
 ) {
-  let script = "";
+  let code = "";
   switch (type) {
     case "array": {
-      script = arrayProps.trim();
+      code = arrayProps.trim();
       break;
     }
     case "identifier": {
-      script = identifierProps.trim();
+      code = identifierProps.trim();
       break;
     }
     case "normal": {
-      script = normalObjectProps.trim();
+      code = normalObjectProps.trim();
       break;
     }
     case "validator": {
-      script = validatorObjectProps.trim();
+      code = validatorObjectProps.trim();
       break;
     }
 
     default:
       break;
   }
-  const ast = parseSync(script, parseOption) as any;
+  const ast = parseSync(code, parseOption) as any;
   return {
-    script,
+    code,
     ast,
     init: ast.body[0].declarations[0].init,
   };
@@ -106,13 +106,11 @@ const arrayComponents = `
 var components = [HelloWorld, Tab]
 `;
 export function getComponentsAst(type: "object" | "array") {
-  const script = (
-    type === "object" ? objectComponents : arrayComponents
-  ).trim();
-  const ast = parseSync(script, parseOption) as any;
+  const code = (type === "object" ? objectComponents : arrayComponents).trim();
+  const ast = parseSync(code, parseOption) as any;
 
   return {
-    script,
+    code,
     ast,
     init: ast.body[0].declarations[0].init,
   };
@@ -133,18 +131,21 @@ var options = {
 `;
 
 export function getDirectivesAst() {
-  const script = directives.trim();
-  const ast = parseSync(script, parseOption) as any;
+  const code = directives.trim();
+  const ast = parseSync(code, parseOption) as any;
 
   return {
-    script,
+    code,
     ast,
     init: ast.body[2].declarations[0].init.properties[0].value,
   };
 }
 
-export function transformToSingeLine(str: string) {
-  return str.replaceAll(/\s/g, "");
+export function transformToSingeLine(str: string | undefined | null) {
+  if (!str) {
+    return "";
+  }
+  return str.replaceAll(/\s|,|;|"|'/g, "");
 }
 
 const objectEmits = `
@@ -155,11 +156,11 @@ const arrayEmits = `
 var emits = ['a', 'b', 'c']
 `;
 export function getEmitsAst(type: "object" | "array") {
-  const script = (type === "object" ? objectEmits : arrayEmits).trim();
-  const ast = parseSync(script, parseOption) as any;
+  const code = (type === "object" ? objectEmits : arrayEmits).trim();
+  const ast = parseSync(code, parseOption) as any;
 
   return {
-    script,
+    code,
     ast,
     init: ast.body[0].declarations[0].init,
   };
@@ -169,10 +170,60 @@ const attrsAndSlots = `
 import { ref } from "vue";
 `;
 export function getAttrsAndSlotsAst() {
-  const script = attrsAndSlots.trim();
-  const ast = parseSync(script, parseOption) as any;
+  const code = attrsAndSlots.trim();
+  const ast = parseSync(code, parseOption) as any;
   return {
-    script,
+    code,
     ast,
+  };
+}
+
+export function getTransformScript() {
+  return {
+    script: `
+      import { defineComponent, PropType, ref } from "vue"
+      import Header from "../components/Header.vue"
+      import Tab from "../components/Tab.vue"
+      import touchdir from "vtouchdir"
+      export default defineComponent({
+        name: 'App',
+        components: {
+          Header,
+          Tab,
+        },
+        directives: {
+          force: {},
+          touchdir,
+        },
+        props: {
+          items: Array as PropType<number[]>
+        },
+        emit: ["click"],
+        setup(props, { emit, attrs, slots: mySlots, expose }) {
+          const bar = ref(0)
+          expose({ bar })
+          expose({ name: "App" })
+          emit("change");
+          return {
+            bar
+          }
+        }
+      })
+      `.trim(),
+    toBeCode: `
+      import { ref, useAttrs, useSlots } from "vue"
+      import Header from "../components/Header.vue"
+      import Tab from "../components/Tab.vue"
+      import vTouchdir from "vtouchdir"
+      const props = defineProps<{items?: number[]; }>();
+      const emit = defineEmits(["click", "change"]);
+      // custom directive 
+      const vForce = {};
+      const attrs = useAttrs();
+      const mySlots = useSlots();
+      const bar = ref(0)
+      emit("change");
+      const expose = defineExpose({ bar, name: "App" });
+      `,
   };
 }

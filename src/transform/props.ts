@@ -5,14 +5,17 @@ import type {
   KeyValueProperty,
   ObjectExpression,
 } from "@swc/core";
-import { Config, FileType, SetupAst } from "../constants";
+import { Config, FileType, SetupAst, VisitorCb } from "../constants";
 import { getPropsValueIdentifier } from "../utils";
 
 function transformProps(
   propsAst: ArrayExpression | Identifier | ObjectExpression,
   setupAst: SetupAst,
   config: Config,
-) {
+): {
+  visitCb?: VisitorCb;
+  str: string;
+} {
   const { script, offset, fileType, propsNotOnlyTs } = config;
 
   let preCode = "";
@@ -32,17 +35,23 @@ function transformProps(
       span: { start, end },
     } = propsAst;
 
-    return `${preCode}defineProps(${script.slice(
-      start - offset,
-      end - offset,
-    )})`;
+    return {
+      str: `${preCode}defineProps(${script.slice(
+        start - offset,
+        end - offset,
+      )})`,
+    };
   }
   if (propsAst.type === "Identifier") {
-    return `${preCode}defineProps(${propsAst.value})`;
+    return {
+      str: `${preCode}defineProps(${propsAst.value})`,
+    };
   }
 
   if (!propsAst.properties.length) {
-    return `${preCode}defineProps()`;
+    return {
+      str: `${preCode}defineProps()`,
+    };
   }
 
   const isNormalProps =
@@ -77,10 +86,12 @@ function transformProps(
     const {
       span: { start, end },
     } = propsAst;
-    return `${preCode}defineProps(${script.slice(
-      start - offset,
-      end - offset,
-    )})`;
+    return {
+      str: `${preCode}defineProps(${script.slice(
+        start - offset,
+        end - offset,
+      )})`,
+    };
   }
 
   let propsDefault = "";
@@ -142,13 +153,31 @@ function transformProps(
     },
   );
 
-  const propsTypeTem = `defineProps<{${propsType.join("")}}>()`;
+  const propsTypeTem = `defineProps<{${propsType.join("")}}>();`;
 
-  return `${preCode}${
-    propsDefault
-      ? `withDefaults(${propsTypeTem}, { ${propsDefault}})`
-      : propsTypeTem
-  }`;
+  const visitCb: VisitorCb = {
+    visitImportDeclaration(n) {
+      n.source = this.visitStringLiteral!(n.source);
+      n.specifiers = this.visitImportSpecifiers!(n.specifiers || []);
+
+      if (n.source.value === "vue") {
+        n.specifiers = n.specifiers.filter(
+          (ast) => ast.local.value !== "PropType",
+        );
+      }
+
+      return n;
+    },
+  };
+
+  return {
+    visitCb,
+    str: `${preCode}${
+      propsDefault
+        ? `withDefaults(${propsTypeTem}, { ${propsDefault}});`
+        : propsTypeTem
+    }`,
+  };
 }
 
 export default transformProps;
