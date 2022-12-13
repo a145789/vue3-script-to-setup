@@ -39,6 +39,8 @@ jobs:
       - run: git push --follow-tags origin main
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - run: nr build
       - run: nr release
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
