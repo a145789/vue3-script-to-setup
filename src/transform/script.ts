@@ -15,7 +15,7 @@ import type {
 import { transformSync } from "@swc/core";
 
 import { parseSync } from "@swc/core";
-import Visitor from "@swc/core/Visitor";
+import { Visitor } from "@swc/core/Visitor";
 
 import {
   Config,

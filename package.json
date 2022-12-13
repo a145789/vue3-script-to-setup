@@ -2,15 +2,18 @@
   "name": "vue3-script-to-setup",
   "type": "module",
   "version": "0.0.0",
+  "author": "clencat <2091927351@qq.com>",
   "packageManager": "pnpm@7.12.0",
-  "description": "",
+  "description": "transform your vue3 script to setup mode",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/antfu/vue3-script-to-setup.git"
+    "url": "git+https://github.com/a145789/vue3-script-to-setup"
   },
-  "bugs": "https://github.com/antfu/vue3-script-to-setup/issues",
-  "keywords": [],
+  "bugs": "https://github.com/a145789/vue3-script-to-setup/issues",
+  "keywords": [
+    "vue3"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
@@ -36,6 +39,9 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "build": "unbuild",
     "dev": "unbuild --stub",

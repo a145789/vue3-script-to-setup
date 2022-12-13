@@ -6,7 +6,7 @@ import type {
   TsType,
 } from "@swc/core";
 import { Config, SetupAst, USE_ATTRS, USE_SLOTS } from "../constants";
-import Visitor from "@swc/core/Visitor";
+import { Visitor } from "@swc/core/Visitor";
 import { getSetupSecondParams } from "../utils";
 import MagicString from "magic-string";
 

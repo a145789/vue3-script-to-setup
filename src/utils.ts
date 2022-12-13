@@ -12,7 +12,7 @@ import type {
   Options,
   TsTypeReference,
 } from "@swc/core";
-import Visitor from "@swc/core/Visitor";
+import { Visitor } from "@swc/core/Visitor";
 import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
 import { DefaultOption, SetupAst, VisitorCb } from "./constants";
@@ -74,10 +74,6 @@ export async function useConfigPath(files: string, beginDir = cwd) {
 
 function getFgVueFile(paths: string[]) {
   return fg.sync(paths).filter((p) => p.endsWith(".vue"));
-}
-
-export function defineConfig(option: DefaultOption) {
-  return option;
 }
 
 export function getPropsValueIdentifier(

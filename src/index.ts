@@ -1,60 +1,7 @@
-import { findUpSync } from "find-up";
-import { getTheFileAbsolutePath, output, useConfigPath } from "./utils";
-import { parseSfc } from "./transform";
-import { CommandsOption } from "./constants";
+import { DefaultOption } from "./constants";
+import setup from "./setup";
 
-const CONFIG_FILE_NAME = "tosetup.config" as const;
-
-async function setup() {
-  const argv = process.argv.slice(2).filter(Boolean);
-
-  let { pathNames, commands } = argv.reduce<{
-    pathNames: string[];
-    commands: CommandsOption;
-  }>(
-    (p, c) => {
-      if (c.startsWith("--")) {
-        switch (c.split("--")[1] as keyof typeof p.commands) {
-          case "propsNotOnlyTs":
-            p.commands.propsNotOnlyTs = true;
-            break;
-          case "notUseNewFile":
-            p.commands.notUseNewFile = true;
-            break;
-
-          default:
-            break;
-        }
-        return p;
-      }
-
-      const absolutePath = getTheFileAbsolutePath(c);
-      if (absolutePath) {
-        p.pathNames.push(absolutePath);
-      }
-
-      return p;
-    },
-    { pathNames: [], commands: {} },
-  );
-
-  if (!pathNames.length) {
-    const configPath = findUpSync(CONFIG_FILE_NAME);
-    if (!configPath) {
-      output.error(
-        `Please enter a file path or use a ${CONFIG_FILE_NAME} file.`,
-      );
-      process.exit(1);
-    }
-
-    const config = await useConfigPath(CONFIG_FILE_NAME);
-
-    pathNames = config.pathNames;
-
-    commands = { ...commands, ...config.option };
-  }
-
-  parseSfc(pathNames, commands);
+export function defineConfig(option: DefaultOption) {
+  return option;
 }
-
 setup();
