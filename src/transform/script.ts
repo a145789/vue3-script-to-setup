@@ -11,6 +11,7 @@ import type {
   PropertyName,
   Span,
   Statement,
+  TsType,
 } from "@swc/core";
 import { transformSync } from "@swc/core";
 
@@ -421,5 +422,9 @@ class TransformSetup extends Visitor {
           : [];
     }
     return node;
+  }
+
+  visitTsType(n: TsType) {
+    return n;
   }
 }

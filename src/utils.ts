@@ -10,6 +10,7 @@ import type {
   KeyValuePatternProperty,
   ObjectPattern,
   Options,
+  TsType,
   TsTypeReference,
 } from "@swc/core";
 import { Visitor } from "@swc/core/Visitor";
@@ -136,6 +137,10 @@ export function getSetupSecondParams(
 
   const [_, setupParamsAst] = setupAst.params;
 
+  if (!setupParamsAst) {
+    return;
+  }
+
   if (
     setupParamsAst.type !== "ObjectPattern" &&
     setupParamsAst.type !== "Parameter"
@@ -186,6 +191,9 @@ export class MapVisitor extends Visitor {
       };
     }
   }
+  visitTsType(n: TsType) {
+    return n;
+  }
 }
 
 export class GetCallExpressionFirstArg extends Visitor {
@@ -218,6 +226,10 @@ export class GetCallExpressionFirstArg extends Visitor {
         break;
     }
 
+    return n;
+  }
+
+  visitTsType(n: TsType) {
     return n;
   }
 }

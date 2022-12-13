@@ -104,10 +104,6 @@ function transformDirectives(
       }
       return n;
     },
-
-    visitTsType(n) {
-      return n;
-    },
   };
 
   return {

@@ -73,4 +73,4 @@ async function setup() {
   output.log("\ntosetup end.");
 }
 
-export default setup;
+setup();
