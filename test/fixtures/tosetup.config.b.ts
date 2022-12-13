@@ -1,4 +1,4 @@
-import { defineConfig } from "../../src/index";
+import { defineConfig } from "../../src";
 
 export default defineConfig({
   propsNotOnlyTs: true,
