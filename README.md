@@ -1,4 +1,9 @@
 <h1 align="center">vue3-script-to-setup</h1>
+<p align="center">
+  <a href="https://www.npmjs.com/package/vue3-script-to-setup" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/npm/v/vue3-script-to-setup" alt="NPM Version" /></a>
+  <a href="https://www.npmjs.com/package/vue3-script-to-setup" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/npm/dt/vue3-script-to-setup" alt="NPM Downloads" /></a>
+  <a href="https://github.com/a145789/vue3-script-to-setup/blob/master/LICENSE" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/github/license/a145789/vue3-script-to-setup" alt="License" /></a>
+</p>
 <p align="center">Quickly transform your vue3 script to setup mode</p>
 <p align="center">快速将 vue3 script 转换为 setup 模式</p>
 
