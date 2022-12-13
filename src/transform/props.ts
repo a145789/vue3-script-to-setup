@@ -153,7 +153,7 @@ function transformProps(
     },
   );
 
-  const propsTypeTem = `defineProps<{${propsType.join("")}}>();`;
+  const propsTypeTem = `defineProps<{${propsType.join("")}}>()`;
 
   const visitCb: VisitorCb = {
     visitImportDeclaration(n) {
@@ -174,8 +174,8 @@ function transformProps(
     visitCb,
     str: `${preCode}${
       propsDefault
-        ? `withDefaults(${propsTypeTem}, { ${propsDefault}});`
-        : propsTypeTem
+        ? `withDefaults(${propsTypeTem}, { ${propsDefault} });`
+        : `${propsTypeTem};`
     }`,
   };
 }
