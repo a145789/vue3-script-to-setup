@@ -20,7 +20,7 @@ export function transformSfc(path: string, option: CommandsOption) {
     code = transformScript({
       ...option,
       fileType: script.lang === "ts" ? FileType.ts : FileType.js,
-      script: script.content,
+      script: script.content.trim(),
       offset: 0,
       fileAbsolutePath: path,
       setupScript: "",

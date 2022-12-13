@@ -47,7 +47,7 @@
     "lint": "rome ci ./src",
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
-    "start": "esno src/index.ts",
+    "start": "esno src/setup.ts",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "re-major": "standard-version -r major",

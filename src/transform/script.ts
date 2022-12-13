@@ -82,6 +82,7 @@ function transformScript(config: Config) {
     body,
     span: { start },
   } = program;
+
   config.offset = start;
 
   const exportDefaultAst = body.find(
