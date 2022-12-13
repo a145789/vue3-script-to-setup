@@ -1,4 +1,4 @@
-import { defineConfig } from "../../src/utils";
+import { defineConfig } from "../../src/index";
 
 export default defineConfig({
   path: {

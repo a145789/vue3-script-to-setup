@@ -26,7 +26,7 @@ import transformEmits from "../src/transform/emits";
 import { transformSync } from "@swc/core";
 import transformAttrsAndSlots from "../src/transform/attrsAndSlots";
 import transformExpose from "../src/transform/expose";
-import transformScript from "../src/transform/transformScript";
+import transformScript from "../src/transform/script";
 
 describe("test utils", () => {
   it("test getTheFileAbsolutePath", () => {
