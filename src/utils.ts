@@ -9,14 +9,14 @@ import type {
   Identifier,
   KeyValuePatternProperty,
   ObjectPattern,
-  Options,
   TsType,
   TsTypeReference,
 } from "@swc/core";
-import { Visitor } from "@swc/core/Visitor";
+import { Visitor } from "@swc/core/Visitor.js";
 import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
 import { DefaultOption, SetupAst, VisitorCb } from "./constants";
+import type MagicString from "magic-string";
 
 export const cwd = process.cwd();
 
@@ -176,19 +176,24 @@ export function getSetupSecondParams(
 }
 
 export class MapVisitor extends Visitor {
-  constructor(visitCb: VisitorCb[]) {
+  private ms: MagicString;
+  constructor(visitCb: VisitorCb[], ms: MagicString) {
     super();
+    this.ms = ms;
     const keys = [
       ...new Set(visitCb.flatMap((item) => Object.keys(item))),
     ] as (keyof Visitor)[];
 
     for (const key of keys) {
-      this[key] = (n: any) => {
-        for (const visit of visitCb) {
-          n = (visit[key] as any)?.call(this, n) || n;
-        }
-        return n;
-      };
+      if (key in this) {
+        this[key] = (n: any) => {
+          for (const visit of visitCb) {
+            n = (visit[key] as any)?.call(this, n) || n;
+          }
+          (super[key] as any)?.();
+          return n;
+        };
+      }
     }
   }
   visitTsType(n: TsType) {
@@ -232,34 +237,6 @@ export class GetCallExpressionFirstArg extends Visitor {
   visitTsType(n: TsType) {
     return n;
   }
-}
-
-export function getSwcOptions(plugin?: Visitor): Options {
-  return {
-    jsc: {
-      parser: {
-        syntax: "typescript",
-        tsx: false,
-      },
-      target: "es2022",
-      loose: false,
-      minify: {
-        compress: false,
-        mangle: false,
-      },
-      preserveAllComments: true,
-      transform: {
-        optimizer: undefined,
-      },
-    },
-    module: {
-      type: "es6",
-    },
-    minify: false,
-    isModule: true,
-    inlineSourcesContent: true,
-    plugin: plugin ? (n) => plugin.visitProgram(n) : undefined,
-  };
 }
 
 export const output = {

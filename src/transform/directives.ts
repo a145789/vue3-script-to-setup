@@ -19,17 +19,17 @@ function transformDirectives(
     output.warn(
       `Please manually modify the custom directives in ${fileAbsolutePath}.`,
     );
-    return null;
+    return;
   }
 
   const { properties } = directivesAst;
 
   if (!properties.length) {
-    return null;
+    return;
   }
 
   const importDirective: string[] = [];
-  const str = `// custom directive \n${properties.reduce((p, c) => {
+  const customDirective = properties.reduce((p, c) => {
     if (c.type === "Identifier") {
       // 设置一个转换回调
       importDirective.push(c.value);
@@ -48,68 +48,59 @@ function transformDirectives(
     }
 
     return p;
-  }, "")}`;
+  }, "");
 
   const visitCb: VisitorCb = {
     visitImportDefaultSpecifier(n) {
-      n.local = this.visitBindingIdentifier!(n.local);
-
-      const { value } = n.local;
+      const {
+        value,
+        span: { start, end },
+      } = n.local;
       if (importDirective.includes(value)) {
-        n.local.value = transformDirectiveName(value);
+        this.ms?.update(
+          start - offset,
+          end - offset,
+          transformDirectiveName(value),
+        );
       }
       return n;
     },
-
     visitNamedImportSpecifier(n) {
-      n.local = this.visitBindingIdentifier!(n.local);
-      if (n.imported) {
-        n.imported = this.visitModuleExportName!(n.imported);
-      }
-
-      const { local, imported } = n;
+      const {
+        local: { value, span: { start, end } },
+        imported,
+      } = n;
       if (!imported) {
-        if (importDirective.includes(local.value)) {
-          n.local = {
-            type: "Identifier",
-            span: { start: 0, end: 0, ctxt: 0 },
-            value: transformDirectiveName(local.value),
-            optional: false,
-          };
+        if (importDirective.includes(value)) {
+          this.ms?.appendRight(
+            end - offset,
+            ` as ${transformDirectiveName(value)}`,
+          );
         }
       } else {
-        if (importDirective.includes(local.value)) {
-          n.local.value = transformDirectiveName(local.value);
-        }
-      }
-      return n;
-    },
-
-    visitKeyValueProperty(n) {
-      n.key = this.visitPropertyName!(n.key);
-      n.value = this.visitExpression!(n.value);
-      if (
-        n.key.type === "Identifier" &&
-        n.key.value === "directives" &&
-        n.value.type === "ObjectExpression"
-      ) {
-        for (const ast of n.value.properties) {
-          if (
-            ast.type === "Identifier" &&
-            importDirective.includes(ast.value)
-          ) {
-            ast.value = transformDirectiveName(ast.value);
-          }
+        if (importDirective.includes(value)) {
+          this.ms?.update(start, end, transformDirectiveName(value));
         }
       }
       return n;
     },
   };
 
-  return {
-    visitCb,
-    str,
-  };
+  if (customDirective) {
+    visitCb.visitExportDefaultExpression = function (node) {
+      const {
+        span: { start },
+      } = node;
+      this.ms?.appendLeft(
+        start - offset,
+        `// custom directive \n${customDirective}`,
+      );
+
+      return node;
+    };
+  }
+
+  return visitCb;
 }
 
 export default transformDirectives;

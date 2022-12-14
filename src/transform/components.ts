@@ -1,5 +1,5 @@
 import type { ArrayExpression, Identifier, ObjectExpression } from "@swc/core";
-import { Config, SetupAst } from "../constants";
+import { Config, SetupAst, VisitorCb } from "../constants";
 
 function transformComponents(
   componentsAst: ArrayExpression | Identifier | ObjectExpression,
@@ -11,12 +11,12 @@ function transformComponents(
     componentsAst.type === "ArrayExpression" ||
     componentsAst.type === "Identifier"
   ) {
-    return "";
+    return;
   }
 
   const { properties } = componentsAst;
 
-  return properties.reduce((p, c) => {
+  const str = properties.reduce((p, c) => {
     if (c.type === "KeyValueProperty" && c.key.type !== "Computed") {
       const key = c.key.value;
 
@@ -29,6 +29,21 @@ function transformComponents(
 
     return p;
   }, "");
+
+  if (!str) {
+    return;
+  } else {
+    return {
+      visitExportDefaultExpression(node) {
+        const {
+          span: { start },
+        } = node;
+        this.ms?.appendLeft(start - offset, str);
+
+        return node;
+      },
+    } as VisitorCb;
+  }
 }
 
 export default transformComponents;

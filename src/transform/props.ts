@@ -12,10 +12,7 @@ function transformProps(
   propsAst: ArrayExpression | Identifier | ObjectExpression,
   setupAst: SetupAst,
   config: Config,
-): {
-  visitCb?: VisitorCb;
-  str: string;
-} {
+) {
   const { script, offset, fileType, propsNotOnlyTs } = config;
 
   let preCode = "";
@@ -30,28 +27,36 @@ function transformProps(
     preCode = propsName ? `const ${propsName} = ` : "";
   }
 
+  let str = "";
+  const visitStrCb: VisitorCb = {
+    visitExportDefaultExpression(node) {
+      const {
+        span: { start },
+      } = node;
+      this.ms?.appendLeft(start - offset, str);
+
+      return node;
+    },
+  };
   if (propsAst.type === "ArrayExpression") {
     const {
       span: { start, end },
     } = propsAst;
 
-    return {
-      str: `${preCode}defineProps(${script.slice(
-        start - offset,
-        end - offset,
-      )})`,
-    };
+    str = `${preCode}defineProps(${script.slice(
+      start - offset,
+      end - offset,
+    )})`;
+    return visitStrCb;
   }
   if (propsAst.type === "Identifier") {
-    return {
-      str: `${preCode}defineProps(${propsAst.value})`,
-    };
+    str = `${preCode}defineProps(${propsAst.value})`;
+    return visitStrCb;
   }
 
   if (!propsAst.properties.length) {
-    return {
-      str: `${preCode}defineProps()`,
-    };
+    str = `${preCode}defineProps()`;
+    return visitStrCb;
   }
 
   const isNormalProps =
@@ -86,12 +91,11 @@ function transformProps(
     const {
       span: { start, end },
     } = propsAst;
-    return {
-      str: `${preCode}defineProps(${script.slice(
-        start - offset,
-        end - offset,
-      )})`,
-    };
+    str = `${preCode}defineProps(${script.slice(
+      start - offset,
+      end - offset,
+    )})`;
+    return visitStrCb;
   }
 
   let propsDefault = "";
@@ -157,26 +161,29 @@ function transformProps(
 
   const visitCb: VisitorCb = {
     visitImportDeclaration(n) {
-      n.source = this.visitStringLiteral!(n.source);
-      n.specifiers = this.visitImportSpecifiers!(n.specifiers || []);
-
       if (n.source.value === "vue") {
-        n.specifiers = n.specifiers.filter(
-          (ast) => ast.local.value !== "PropType",
-        );
+        if (n.specifiers.some((ast) => ast.local.value === "PropType")) {
+          const {
+            span: { start, end },
+          } = n;
+          const importStr = script
+            .slice(start - offset, end - offset)
+            .replace(/PropType\s*\,?/g, "");
+          this.ms?.update(start - offset, end - offset, importStr);
+        }
       }
 
       return n;
     },
   };
-
+  str = `${preCode}${
+    propsDefault
+      ? `withDefaults(${propsTypeTem}, { ${propsDefault} });`
+      : `${propsTypeTem};`
+  }`;
   return {
-    visitCb,
-    str: `${preCode}${
-      propsDefault
-        ? `withDefaults(${propsTypeTem}, { ${propsDefault} });`
-        : `${propsTypeTem};`
-    }`,
+    ...visitCb,
+    ...visitStrCb,
   };
 }
 

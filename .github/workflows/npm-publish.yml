@@ -28,12 +28,11 @@ jobs:
       - name: Install
         run: nci
 
-      - name: standard-version
-        if: "contains(github.event.head_commit.message, '[tag major]')"
+      - if: "contains(github.event.head_commit.message, '[tag major]')"
         run: nr re-major
-        else if: "contains(github.event.head_commit.message, '[tag minor]')"
+      - if: "contains(github.event.head_commit.message, '[tag minor]')"
         run: nr re-minor
-        else if: "contains(github.event.head_commit.message, '[tag patch]')"
+      - if: "contains(github.event.head_commit.message, '[tag patch]')"
         run: nr re-patch
         
       - run: git push --follow-tags origin main

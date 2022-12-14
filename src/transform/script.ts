@@ -5,27 +5,16 @@ import type {
   Identifier,
   KeyValueProperty,
   MethodProperty,
-  ModuleItem,
   ObjectExpression,
-  Program,
   PropertyName,
   Span,
   Statement,
-  TsType,
 } from "@swc/core";
-import { transformSync } from "@swc/core";
 
 import { parseSync } from "@swc/core";
-import { Visitor } from "@swc/core/Visitor";
 
-import {
-  Config,
-  parseOption,
-  USE_ATTRS,
-  USE_SLOTS,
-  VisitorCb,
-} from "../constants";
-import { getSwcOptions, MapVisitor, output } from "../utils";
+import { Config, parseOption, VisitorCb } from "../constants";
+import { MapVisitor, output } from "../utils";
 import transformComponents from "./components";
 import transformDirectives from "./directives";
 import transformEmits from "./emits";
@@ -56,24 +45,13 @@ const ILLEGAL_OPTIONS_API = [
 ] as readonly string[];
 
 interface TransformOption {
-  props?: {
-    visitCb?: VisitorCb;
-    str: string;
-  };
-  emits?: string;
-  components?: string;
-  directives?: {
-    visitCb: VisitorCb;
-    str: string;
-  } | null;
-  attrsAndSlots?: {
-    getMagicString: (ast: Program, script: string) => string;
-    str: string;
-  } | null;
-  expose?: {
-    visitCb: VisitorCb;
-    str: string;
-  } | null;
+  props?: VisitorCb;
+  emits?: VisitorCb;
+  components?: VisitorCb;
+  directives?: VisitorCb;
+  attrsAndSlots?: VisitorCb;
+  expose?: VisitorCb;
+  setup?: VisitorCb;
 }
 
 function transformScript(config: Config) {
@@ -158,7 +136,75 @@ function transformScript(config: Config) {
     setupFnAst.span.end - config.offset,
   );
 
-  const transformOption: TransformOption = {};
+  const transformOption: TransformOption = {
+    setup: {
+      visitExportDefaultExpression(node) {
+        this.exportDefaultExpressionSpan = node.span;
+        return node;
+      },
+      myVisitStatements(items: Statement[]) {
+        const { start, end } = this.exportDefaultExpressionSpan!;
+
+        for (const ast of items) {
+          if (ast.type === "ReturnStatement") {
+            this.ms?.remove(ast.span.start - offset, ast.span.end - offset);
+            break;
+          }
+        }
+
+        const firstNode = items[0];
+        const lastNode = items[items.length - 1];
+        if (firstNode) {
+          this.ms?.remove(start - offset, firstNode.span.start);
+          this.ms?.remove(lastNode.span.end - offset, end - offset);
+        }
+
+        return items;
+      },
+      visitMethodProperty(node: MethodProperty) {
+        if (
+          (node.key.type === "Identifier" ||
+            node.key.type === "StringLiteral") &&
+          node.key.value === "setup" &&
+          node.body?.stmts
+        ) {
+          this.myVisitStatements(node.body.stmts);
+        }
+        return node;
+      },
+      visitKeyValueProperty(node: KeyValueProperty) {
+        if (
+          (node.key.type === "Identifier" ||
+            node.key.type === "StringLiteral") &&
+          node.key.value === "setup" &&
+          node.value.type === "ArrowFunctionExpression"
+        ) {
+          const { body } = node.value;
+          if (body.type === "BlockStatement") {
+            this.myVisitStatements(body.stmts);
+          }
+        }
+        return node;
+      },
+      visitImportDeclaration(n) {
+        if (n.source.value === "vue") {
+          if (
+            n.specifiers.some((ast) => ast.local.value === "defineComponent")
+          ) {
+            const {
+              span: { start, end },
+            } = n;
+            const importStr = script
+              .slice(start - offset, end - offset)
+              .replace(/defineComponent\s*\,?/g, "");
+            this.ms?.update(start - offset, end - offset, importStr);
+          }
+        }
+
+        return n;
+      },
+    },
+  };
   for (const ast of optionAst.properties) {
     if (ast.type === "SpreadElement") {
       output.warn(
@@ -237,52 +283,25 @@ function transformScript(config: Config) {
     console.log(error);
   }
 
-  let script = config.script;
+  const { script, offset } = config;
 
-  const visitCb: VisitorCb = {
-    visitImportDeclaration(n) {
-      if (n.source.value === "vue") {
-        n.specifiers = n.specifiers.filter(
-          (ast) => ast.local.value !== "defineComponent",
-        );
-      }
-
-      return n;
-    },
-  };
+  const ms = new MagicString(script);
 
   const visitCbs = [
-    transformOption?.props?.visitCb!,
-    transformOption?.directives?.visitCb!,
-    transformOption?.expose?.visitCb!,
-    visitCb,
-  ].filter(Boolean);
+    transformOption?.components,
+    transformOption?.props,
+    transformOption?.emits,
+    transformOption?.directives,
+    transformOption?.attrsAndSlots,
+    transformOption?.setup,
+    transformOption?.expose,
+  ].filter(Boolean) as VisitorCb[];
   if (visitCbs.length) {
-    const { code } = transformSync(
-      script,
-      getSwcOptions(new MapVisitor(visitCbs)),
-    );
-    script = code;
+    const visitor = new MapVisitor(visitCbs, ms);
+    visitor.visitProgram(program);
   }
 
-  if (transformOption?.attrsAndSlots?.getMagicString) {
-    script = transformOption.attrsAndSlots.getMagicString(
-      parseSync(script, parseOption),
-      script,
-    );
-  }
-
-  const ast = parseSync(script, parseOption);
-
-  const transformSetup = new TransformSetup(
-    new MagicString(script),
-    ast.span.start,
-    script,
-    transformOption,
-  );
-  transformSetup.visitProgram(ast);
-
-  return transformSetup.getString();
+  return ms.toString();
 }
 
 export default transformScript;
@@ -295,137 +314,5 @@ function getOptionKey(key: PropertyName) {
 
     default:
       return "";
-  }
-}
-
-class TransformSetup extends Visitor {
-  private stmts: Statement[] = [];
-  ms: MagicString;
-  offset: number;
-  script: string;
-  transformOption: TransformOption;
-  constructor(
-    ms: MagicString,
-    offset: number,
-    script: string,
-    transformOption: TransformOption,
-  ) {
-    super();
-    this.ms = ms;
-    this.offset = offset;
-    this.script = script;
-    this.transformOption = transformOption;
-  }
-
-  getString() {
-    return this.ms.toString();
-  }
-
-  visitModuleItems(items: ModuleItem[]) {
-    for (let index = 0; index < items.length; index++) {
-      const ast = items[index];
-      if (ast.type === "ExportDefaultExpression") {
-        this.visitModuleItem(ast);
-        const indexs = this.stmts
-          .reduce<{ start: number | null; end: number | null }[]>(
-            (p, c, currentIndex, array) => {
-              const { start, end } = c.span;
-              const index = p[p.length - 1];
-              if (c.type === "ReturnStatement") {
-                if (index) {
-                  index.end = end;
-                }
-                p.push({ start: null, end: null });
-                return p;
-              }
-              if (p.length > 1 && index.start === null && index.end === null) {
-                index.start = start;
-                return p;
-              }
-              if (currentIndex === 0 && !p.length) {
-                p.push({ start, end: null });
-              }
-              if (currentIndex === array.length - 1) {
-                index.end = end;
-              }
-              return p;
-            },
-            [],
-          )
-          .filter((index) => index.start !== null && index.end !== null);
-
-        this.ms.update(
-          ast.span.start - this.offset,
-          ast.span.end - this.offset,
-          indexs
-            .map(({ start, end }) =>
-              this.script.slice(start! - this.offset, end! - this.offset),
-            )
-            .join("\n"),
-        );
-
-        const { props, emits, components, directives, attrsAndSlots, expose } =
-          this.transformOption;
-        this.ms.appendLeft(
-          ast.span.start - this.offset,
-          `${props ? `\n${props.str}\n` : ""}${emits ? `\n${emits}\n` : ""}${
-            components ? `\n${components}\n` : ""
-          }${directives?.str ? `\n${directives.str}\n` : ""}${
-            attrsAndSlots?.str ? `\n${attrsAndSlots.str}\n` : ""
-          }`,
-        );
-
-        this.ms.appendRight(
-          ast.span.end - this.offset,
-          `${expose?.str ? `\n${expose.str}\n` : ""}`,
-        );
-      }
-
-      if (
-        ast.type === "ExpressionStatement" &&
-        ast.expression.type === "CallExpression" &&
-        ast.expression.callee.type === "Identifier" &&
-        (ast.expression.callee.value === USE_ATTRS ||
-          ast.expression.callee.value === USE_SLOTS)
-      ) {
-        const {
-          span: { start, end },
-        } = ast;
-        this.ms.remove(start - this.offset, end - this.offset);
-      }
-    }
-
-    return items;
-  }
-
-  visitMethodProperty(node: MethodProperty) {
-    if (
-      (node.key.type === "Identifier" || node.key.type === "StringLiteral") &&
-      node.key.value === "setup"
-    ) {
-      this.stmts = node.body?.stmts?.filter(
-        (ast) => ast.type !== "ReturnStatement",
-      )!;
-    }
-    return node;
-  }
-
-  visitKeyValueProperty(node: KeyValueProperty) {
-    if (
-      (node.key.type === "Identifier" || node.key.type === "StringLiteral") &&
-      node.key.value === "setup" &&
-      node.value.type === "ArrowFunctionExpression"
-    ) {
-      const { body } = node.value;
-      this.stmts =
-        body.type === "BlockStatement"
-          ? body.stmts.filter((ast) => ast.type !== "ReturnStatement")!
-          : [];
-    }
-    return node;
-  }
-
-  visitTsType(n: TsType) {
-    return n;
   }
 }

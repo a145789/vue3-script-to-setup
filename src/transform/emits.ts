@@ -1,6 +1,6 @@
 import type { Identifier, ArrayExpression, ObjectExpression } from "@swc/core";
 
-import { Config, SetupAst } from "../constants";
+import { Config, SetupAst, VisitorCb } from "../constants";
 import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
 
 function transformEmits(
@@ -11,23 +11,37 @@ function transformEmits(
   const { script, offset, setupScript, fileAbsolutePath } = config;
   const name = getSetupSecondParams("emit", setupAst, fileAbsolutePath);
   if (!name) {
-    return "";
+    return;
   }
 
   const preCode = `const ${name} = `;
+  let str = "";
+  const visitStrCb: VisitorCb = {
+    visitExportDefaultExpression(node) {
+      const {
+        span: { start },
+      } = node;
+      this.ms?.appendLeft(start - offset, str);
+
+      return node;
+    },
+  };
 
   if (emitsAst.type === "ObjectExpression") {
     const {
       span: { start, end },
     } = emitsAst;
-    return `${preCode}defineEmits(${script.slice(
+    str = `${preCode}defineEmits(${script.slice(
       start - offset,
       end - offset,
     )});`;
+
+    return visitStrCb;
   }
 
   if (emitsAst.type === "Identifier") {
-    return `${preCode}defineEmits(${emitsAst.value});`;
+    str = `${preCode}defineEmits(${emitsAst.value});`;
+    return visitStrCb;
   }
 
   let emitNames: string[] = [];
@@ -52,7 +66,8 @@ function transformEmits(
     return script.slice(start - offset, end - offset);
   });
 
-  return `${preCode}defineEmits([${[...keys, ...emitNames].join(", ")}]);`;
+  str = `${preCode}defineEmits([${[...keys, ...emitNames].join(", ")}]);`;
+  return visitStrCb;
 }
 
 export default transformEmits;

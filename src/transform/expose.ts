@@ -3,10 +3,10 @@ import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
 import { Statement } from "@swc/core";
 
 function transformExpose(setupAst: SetupAst, config: Config) {
-  const { setupScript, fileAbsolutePath } = config;
+  const { setupScript, offset, fileAbsolutePath } = config;
   const name = getSetupSecondParams("expose", setupAst, fileAbsolutePath);
   if (!name) {
-    return null;
+    return;
   }
 
   let exposeArg: string[] = [];
@@ -33,20 +33,8 @@ function transformExpose(setupAst: SetupAst, config: Config) {
       .filter((s) => Boolean(s.trim()));
   }
 
-  const str = `const ${name} = defineExpose({${exposeArg.join(",")}});`;
-
   const visitCb: VisitorCb = {
     visitMethodProperty(n) {
-      n.key = this.visitPropertyName!(n.key);
-      if (n.body) {
-        n.body = this.visitBlockStatement!(n.body);
-      }
-      n.decorators = this.visitDecorators!(n.decorators);
-      n.params = this.visitParameters!(n.params);
-      n.returnType = this.visitTsTypeAnnotation!(n.returnType);
-      n.typeParameters = this.visitTsTypeParameterDeclaration!(
-        n.typeParameters,
-      );
       if (n.key.type === "Identifier" && n.key.value === "setup") {
         if (n.body) {
           n.body.stmts = this.myVisitStatements(n.body.stmts);
@@ -56,8 +44,6 @@ function transformExpose(setupAst: SetupAst, config: Config) {
       return n;
     },
     visitKeyValueProperty(n) {
-      n.key = this.visitPropertyName!(n.key);
-      n.value = this.visitExpression!(n.value);
       if (
         n.key.type === "Identifier" &&
         n.key.value === "setup" &&
@@ -70,22 +56,32 @@ function transformExpose(setupAst: SetupAst, config: Config) {
       return n;
     },
     myVisitStatements(stmts: Statement[]): Statement[] {
-      return stmts.filter(
-        (stmt) =>
-          !(
-            stmt.type === "ExpressionStatement" &&
-            stmt.expression.type === "CallExpression" &&
-            stmt.expression.callee.type === "Identifier" &&
-            stmt.expression.callee.value === name
-          ),
+      for (const stmt of stmts) {
+        if (
+          stmt.type === "ExpressionStatement" &&
+          stmt.expression.type === "CallExpression" &&
+          stmt.expression.callee.type === "Identifier" &&
+          stmt.expression.callee.value === name
+        ) {
+          this.ms?.remove(stmt.span.start - offset, stmt.span.end - offset);
+        }
+      }
+      return stmts;
+    },
+    visitExportDefaultExpression(node) {
+      const {
+        span: { start },
+      } = node;
+      this.ms?.appendLeft(
+        start - offset,
+        `const ${name} = defineExpose({${exposeArg.join(",")}});`,
       );
+
+      return node;
     },
   };
 
-  return {
-    visitCb,
-    str,
-  };
+  return visitCb;
 }
 
 export default transformExpose;
