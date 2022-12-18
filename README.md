@@ -191,3 +191,26 @@ Unable to transform `TypeScript-only Features` of `defineEmits`, support only
 ```ts
 const emit = defineEmits(['change', 'delete'])
 ```
+
+If `expose` is not specified, the reference may fail in the outer layer.
+
+如果在 `script` 代码下子组件没有通过 `expose` 暴露内部状态，转换为 `setup` 代码后父组件将引用失败。
+
+```ts
+// Child.vue
+export default {
+  setup() {
+    function foo() {}
+    return { foo }
+  }
+}
+
+// Parent.vue
+export default {
+  mounted() {
+    // Child.vue is script code, it`s work
+    // Child.vue is setup code, foo is undefined
+    this.$refs.child.foo()
+  }
+}
+```
