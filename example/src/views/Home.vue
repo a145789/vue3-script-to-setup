@@ -2,7 +2,7 @@
 import { PropType, ref, watch } from 'vue'
 import Header from "../components/Header.vue"
 import Tab from "../components/Tab.vue"
-export default ({
+export default {
   name: 'Home',
   components: {
     Header,
@@ -30,7 +30,7 @@ export default ({
     })
     return { foo }
   }
-})
+}
 </script>
 
 <template>

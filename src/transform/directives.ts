@@ -1,6 +1,14 @@
-import type { Identifier, ObjectExpression } from "@swc/core";
-import { Config, SetupAst, VisitorCb } from "../constants";
+import type {
+  ExportDefaultExpression,
+  Identifier,
+  ImportDefaultSpecifier,
+  NamedImportSpecifier,
+  ObjectExpression,
+} from "@swc/core";
+import { Config, SetupAst } from "../constants";
 import { output } from "../utils";
+import { Visitor } from "@swc/core/Visitor.js";
+import type MagicString from "magic-string";
 
 function transformDirectiveName(name: string) {
   return `v${name.slice(0, 1).toLocaleUpperCase() + name.slice(1)}`;
@@ -49,58 +57,66 @@ function transformDirectives(
 
     return p;
   }, "");
-
-  const visitCb: VisitorCb = {
-    visitImportDefaultSpecifier(n) {
+  class MyVisitor extends Visitor {
+    ms: MagicString;
+    constructor(ms: MagicString) {
+      super();
+      this.ms = ms;
+    }
+    visitImportDefaultSpecifier(n: ImportDefaultSpecifier) {
       const {
         value,
         span: { start, end },
       } = n.local;
       if (importDirective.includes(value)) {
-        this.ms?.update(
+        this.ms.update(
           start - offset,
           end - offset,
           transformDirectiveName(value),
         );
       }
       return n;
-    },
-    visitNamedImportSpecifier(n) {
+    }
+    visitNamedImportSpecifier(n: NamedImportSpecifier) {
       const {
         local: { value, span: { start, end } },
         imported,
       } = n;
       if (!imported) {
         if (importDirective.includes(value)) {
-          this.ms?.appendRight(
+          this.ms.appendRight(
             end - offset,
             ` as ${transformDirectiveName(value)}`,
           );
         }
       } else {
         if (importDirective.includes(value)) {
-          this.ms?.update(start, end, transformDirectiveName(value));
+          this.ms.update(
+            start - offset,
+            end - offset,
+            transformDirectiveName(value),
+          );
         }
       }
       return n;
-    },
-  };
-
-  if (customDirective) {
-    visitCb.visitExportDefaultExpression = function (node) {
+    }
+    visitExportDefaultExpression(n: ExportDefaultExpression) {
+      if (!customDirective) {
+        return n;
+      }
       const {
         span: { start },
-      } = node;
-      this.ms?.appendLeft(
+      } = n;
+      this.ms.appendLeft(
         start - offset,
         `// custom directive \n${customDirective}`,
       );
 
-      return node;
-    };
+      return n;
+    }
   }
 
-  return visitCb;
+  return MyVisitor;
 }
 
 export default transformDirectives;

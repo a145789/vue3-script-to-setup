@@ -7,6 +7,7 @@ import type {
   CallExpression,
   Expression,
   Identifier,
+  ImportDeclaration,
   KeyValuePatternProperty,
   ObjectPattern,
   TsType,
@@ -15,8 +16,9 @@ import type {
 import { Visitor } from "@swc/core/Visitor.js";
 import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
-import { DefaultOption, SetupAst, VisitorCb } from "./constants";
+import { DefaultOption, SetupAst } from "./constants";
 import type MagicString from "magic-string";
+import { TransformOption } from "./transform/script";
 
 export const cwd = process.cwd();
 
@@ -175,29 +177,31 @@ export function getSetupSecondParams(
     : (nameAst.value as Identifier).value;
 }
 
+Visitor.prototype.visitTsType = (n: TsType) => {
+  return n;
+};
 export class MapVisitor extends Visitor {
-  private ms: MagicString;
-  constructor(visitCb: VisitorCb[], ms: MagicString) {
+  constructor(visitCb: TransformOption["props"][], ms: MagicString) {
     super();
-    this.ms = ms;
+    const visits = visitCb.map((V) => new V!(ms));
     const keys = [
-      ...new Set(visitCb.flatMap((item) => Object.keys(item))),
-    ] as (keyof Visitor)[];
+      ...new Set(
+        visitCb.flatMap((item) => Object.getOwnPropertyNames(item!.prototype)),
+      ),
+    ].filter((key) => key !== "constructor") as (keyof Visitor)[];
 
     for (const key of keys) {
-      if (key in this) {
+      if (key in this && typeof this[key] === "function") {
         this[key] = (n: any) => {
-          for (const visit of visitCb) {
-            n = (visit[key] as any)?.call(this, n) || n;
+          for (const visit of visits) {
+            (visit[key] as any)?.(n);
           }
-          (super[key] as any)?.();
+
+          (super[key] as any)(n);
           return n;
         };
       }
     }
-  }
-  visitTsType(n: TsType) {
-    return n;
   }
 }
 
@@ -245,3 +249,26 @@ export const output = {
   log: (message: string) => console.log(blue(message)),
   success: (message: string) => console.log(green(message)),
 };
+
+export function getSpecifierOffset(
+  n: ImportDeclaration,
+  index: number,
+  script: string,
+  offset: number,
+) {
+  const { specifiers } = n;
+  const ast = specifiers[index];
+  let end = ast.span.end;
+  if (index + 1 === specifiers.length) {
+    const commaIdx = script
+      .slice(ast.span.start - offset, n.span.end - offset)
+      .indexOf(",");
+    if (commaIdx !== -1) {
+      end = ast.span.start + 1;
+    }
+  } else {
+    end = specifiers[index + 1].span.start;
+  }
+
+  return { start: ast.span.start, end };
+}

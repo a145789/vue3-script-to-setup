@@ -2,17 +2,23 @@ import { parseSync } from "@swc/core";
 import { parseOption } from "../src/constants";
 
 const setupHasParams = `
-  (props, { emit: cEmit, attrs, slots: cSlots, expose }) => {
-    expose({ a, b: foo, })
-    const foo = ref(0)
-    cEmit('change');
-    cEmit("click", foo);
-    every("hello");
-    expose({ count: publicCount });
-    expose({ ...form })
-  }
+  export default defineComponent({
+    setup: (props, { emit: cEmit, attrs, slots: cSlots, expose }) => {
+      expose({ a, b: foo, })
+      const foo = ref(0)
+      cEmit('change');
+      cEmit("click", foo);
+      every("hello");
+      expose({ count: publicCount });
+      expose({ ...form })
+    }
+  })
 `;
-const setupNoParams = "()=>{}";
+const setupNoParams = `
+  export default defineComponent({
+    setup: ()=>{}
+  })
+`;
 
 export function getSetupFnAst(type: "has" | "none") {
   const script = (type === "has" ? setupHasParams : setupNoParams).trim();

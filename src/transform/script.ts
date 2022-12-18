@@ -1,8 +1,10 @@
 import type {
   ArrayExpression,
   ArrowFunctionExpression,
+  ExportDefaultExpression,
   Expression,
   Identifier,
+  ImportDeclaration,
   KeyValueProperty,
   MethodProperty,
   ObjectExpression,
@@ -13,8 +15,8 @@ import type {
 
 import { parseSync } from "@swc/core";
 
-import { Config, parseOption, VisitorCb } from "../constants";
-import { MapVisitor, output } from "../utils";
+import { Config, parseOption } from "../constants";
+import { getSpecifierOffset, MapVisitor, output } from "../utils";
 import transformComponents from "./components";
 import transformDirectives from "./directives";
 import transformEmits from "./emits";
@@ -22,6 +24,7 @@ import transformProps from "./props";
 import MagicString from "magic-string";
 import transformExpose from "./expose";
 import transformAttrsAndSlots from "./attrsAndSlots";
+import { Visitor } from "@swc/core/Visitor.js";
 
 const ILLEGAL_OPTIONS_API = [
   "data",
@@ -44,18 +47,19 @@ const ILLEGAL_OPTIONS_API = [
   "extends",
 ] as readonly string[];
 
-interface TransformOption {
-  props?: VisitorCb;
-  emits?: VisitorCb;
-  components?: VisitorCb;
-  directives?: VisitorCb;
-  attrsAndSlots?: VisitorCb;
-  expose?: VisitorCb;
-  setup?: VisitorCb;
+export interface TransformOption {
+  props?: ReturnType<typeof transformProps>;
+  emits?: ReturnType<typeof transformEmits>;
+  components?: ReturnType<typeof transformComponents>;
+  directives?: ReturnType<typeof transformDirectives>;
+  attrsAndSlots?: ReturnType<typeof transformAttrsAndSlots>;
+  expose?: ReturnType<typeof transformExpose>;
+  setup?: ReturnType<typeof transformProps>;
 }
 
 function transformScript(config: Config) {
   const program = parseSync(config.script, parseOption);
+
   const {
     body,
     span: { start },
@@ -96,7 +100,7 @@ function transformScript(config: Config) {
     return null;
   }
 
-  const setupAstIndex = optionAst.properties.findIndex((ast) => {
+  const setupAst = optionAst.properties.find((ast) => {
     if (
       (ast.type === "MethodProperty" || ast.type === "KeyValueProperty") &&
       (ast.key.type === "Identifier" || ast.key.type === "StringLiteral")
@@ -115,11 +119,7 @@ function transformScript(config: Config) {
       }
     }
     return false;
-  });
-
-  const [setupAst] = optionAst.properties.splice(setupAstIndex, 1) as [
-    MethodProperty | KeyValueProperty,
-  ];
+  }) as MethodProperty | KeyValueProperty;
   if (!setupAst) {
     output.warn(
       `There is no setup method in options in the ${config.fileAbsolutePath}`,
@@ -136,75 +136,7 @@ function transformScript(config: Config) {
     setupFnAst.span.end - config.offset,
   );
 
-  const transformOption: TransformOption = {
-    setup: {
-      visitExportDefaultExpression(node) {
-        this.exportDefaultExpressionSpan = node.span;
-        return node;
-      },
-      myVisitStatements(items: Statement[]) {
-        const { start, end } = this.exportDefaultExpressionSpan!;
-
-        for (const ast of items) {
-          if (ast.type === "ReturnStatement") {
-            this.ms?.remove(ast.span.start - offset, ast.span.end - offset);
-            break;
-          }
-        }
-
-        const firstNode = items[0];
-        const lastNode = items[items.length - 1];
-        if (firstNode) {
-          this.ms?.remove(start - offset, firstNode.span.start);
-          this.ms?.remove(lastNode.span.end - offset, end - offset);
-        }
-
-        return items;
-      },
-      visitMethodProperty(node: MethodProperty) {
-        if (
-          (node.key.type === "Identifier" ||
-            node.key.type === "StringLiteral") &&
-          node.key.value === "setup" &&
-          node.body?.stmts
-        ) {
-          this.myVisitStatements(node.body.stmts);
-        }
-        return node;
-      },
-      visitKeyValueProperty(node: KeyValueProperty) {
-        if (
-          (node.key.type === "Identifier" ||
-            node.key.type === "StringLiteral") &&
-          node.key.value === "setup" &&
-          node.value.type === "ArrowFunctionExpression"
-        ) {
-          const { body } = node.value;
-          if (body.type === "BlockStatement") {
-            this.myVisitStatements(body.stmts);
-          }
-        }
-        return node;
-      },
-      visitImportDeclaration(n) {
-        if (n.source.value === "vue") {
-          if (
-            n.specifiers.some((ast) => ast.local.value === "defineComponent")
-          ) {
-            const {
-              span: { start, end },
-            } = n;
-            const importStr = script
-              .slice(start - offset, end - offset)
-              .replace(/defineComponent\s*\,?/g, "");
-            this.ms?.update(start - offset, end - offset, importStr);
-          }
-        }
-
-        return n;
-      },
-    },
-  };
+  const transformOption: TransformOption = {};
   for (const ast of optionAst.properties) {
     if (ast.type === "SpreadElement") {
       output.warn(
@@ -284,6 +216,78 @@ function transformScript(config: Config) {
   }
 
   const { script, offset } = config;
+  class SetupVisitor extends Visitor {
+    ms: MagicString;
+    exportDefaultExpressionSpan = {
+      start: 0,
+      end: 0,
+    };
+    constructor(ms: MagicString) {
+      super();
+      this.ms = ms;
+    }
+    visitExportDefaultExpression(node: ExportDefaultExpression) {
+      this.exportDefaultExpressionSpan = node.span;
+      return node;
+    }
+    myVisitStatements(items: Statement[]) {
+      const { start, end } = this.exportDefaultExpressionSpan;
+
+      for (const ast of items) {
+        if (ast.type === "ReturnStatement") {
+          this.ms.remove(ast.span.start - offset, ast.span.end - offset);
+          break;
+        }
+      }
+
+      const firstNode = items[0];
+      const lastNode = items[items.length - 1];
+      if (firstNode) {
+        this.ms.remove(start - offset, firstNode.span.start - offset);
+        this.ms.remove(lastNode.span.end - offset, end - offset);
+      }
+
+      return items;
+    }
+    visitMethodProperty(node: MethodProperty) {
+      if (
+        (node.key.type === "Identifier" || node.key.type === "StringLiteral") &&
+        node.key.value === "setup" &&
+        node.body?.stmts
+      ) {
+        this.myVisitStatements(node.body.stmts);
+      }
+      return node;
+    }
+    visitKeyValueProperty(node: KeyValueProperty) {
+      if (
+        (node.key.type === "Identifier" || node.key.type === "StringLiteral") &&
+        node.key.value === "setup" &&
+        node.value.type === "ArrowFunctionExpression"
+      ) {
+        const { body } = node.value;
+        if (body.type === "BlockStatement") {
+          this.myVisitStatements(body.stmts);
+        }
+      }
+      return node;
+    }
+    visitImportDeclaration(n: ImportDeclaration) {
+      if (n.source.value === "vue") {
+        const index = n.specifiers.findIndex(
+          (ast) => ast.local.value === "defineComponent",
+        );
+        if (index !== -1) {
+          const { start, end } = getSpecifierOffset(n, index, script, offset);
+          this.ms.remove(start - offset, end - offset);
+        }
+      }
+
+      return n;
+    }
+  }
+
+  transformOption.setup = SetupVisitor;
 
   const ms = new MagicString(script);
 
@@ -295,7 +299,7 @@ function transformScript(config: Config) {
     transformOption?.attrsAndSlots,
     transformOption?.setup,
     transformOption?.expose,
-  ].filter(Boolean) as VisitorCb[];
+  ].filter(Boolean) as TransformOption["props"][];
   if (visitCbs.length) {
     const visitor = new MapVisitor(visitCbs, ms);
     visitor.visitProgram(program);

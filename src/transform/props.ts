@@ -1,12 +1,16 @@
 import type {
   ArrayExpression,
   BooleanLiteral,
+  ExportDefaultExpression,
   Identifier,
+  ImportDeclaration,
   KeyValueProperty,
   ObjectExpression,
 } from "@swc/core";
-import { Config, FileType, SetupAst, VisitorCb } from "../constants";
-import { getPropsValueIdentifier } from "../utils";
+import { Config, FileType, SetupAst } from "../constants";
+import { getPropsValueIdentifier, getSpecifierOffset } from "../utils";
+import { Visitor } from "@swc/core/Visitor.js";
+import type MagicString from "magic-string";
 
 function transformProps(
   propsAst: ArrayExpression | Identifier | ObjectExpression,
@@ -27,17 +31,40 @@ function transformProps(
     preCode = propsName ? `const ${propsName} = ` : "";
   }
 
+  let isNormalProps = true;
   let str = "";
-  const visitStrCb: VisitorCb = {
-    visitExportDefaultExpression(node) {
+  class MyVisitor extends Visitor {
+    ms: MagicString;
+    constructor(ms: MagicString) {
+      super();
+      this.ms = ms;
+    }
+    visitExportDefaultExpression(node: ExportDefaultExpression) {
       const {
         span: { start },
       } = node;
-      this.ms?.appendLeft(start - offset, str);
+      this.ms.appendLeft(start - offset, str);
 
       return node;
-    },
-  };
+    }
+    visitImportDeclaration(n: ImportDeclaration) {
+      if (isNormalProps) {
+        return n;
+      }
+      if (n.source.value === "vue") {
+        const index = n.specifiers.findIndex(
+          (ast) => ast.local.value === "PropType",
+        );
+        if (index !== -1) {
+          const { start, end } = getSpecifierOffset(n, index, script, offset);
+
+          this.ms.remove(start - offset, end - offset);
+        }
+      }
+
+      return n;
+    }
+  }
   if (propsAst.type === "ArrayExpression") {
     const {
       span: { start, end },
@@ -46,20 +73,20 @@ function transformProps(
     str = `${preCode}defineProps(${script.slice(
       start - offset,
       end - offset,
-    )})`;
-    return visitStrCb;
+    )});\n`;
+    return MyVisitor;
   }
   if (propsAst.type === "Identifier") {
-    str = `${preCode}defineProps(${propsAst.value})`;
-    return visitStrCb;
+    str = `${preCode}defineProps(${propsAst.value});\n`;
+    return MyVisitor;
   }
 
   if (!propsAst.properties.length) {
-    str = `${preCode}defineProps()`;
-    return visitStrCb;
+    str = `${preCode}defineProps();\n`;
+    return MyVisitor;
   }
 
-  const isNormalProps =
+  isNormalProps =
     propsNotOnlyTs ||
     fileType !== FileType.ts ||
     propsAst.properties.some(
@@ -94,8 +121,8 @@ function transformProps(
     str = `${preCode}defineProps(${script.slice(
       start - offset,
       end - offset,
-    )})`;
-    return visitStrCb;
+    )});\n`;
+    return MyVisitor;
   }
 
   let propsDefault = "";
@@ -157,34 +184,14 @@ function transformProps(
     },
   );
 
-  const propsTypeTem = `defineProps<{${propsType.join("")}}>()`;
+  const propsTypeTem = `defineProps<{ ${propsType.join("")}}>()`;
 
-  const visitCb: VisitorCb = {
-    visitImportDeclaration(n) {
-      if (n.source.value === "vue") {
-        if (n.specifiers.some((ast) => ast.local.value === "PropType")) {
-          const {
-            span: { start, end },
-          } = n;
-          const importStr = script
-            .slice(start - offset, end - offset)
-            .replace(/PropType\s*\,?/g, "");
-          this.ms?.update(start - offset, end - offset, importStr);
-        }
-      }
-
-      return n;
-    },
-  };
   str = `${preCode}${
     propsDefault
-      ? `withDefaults(${propsTypeTem}, { ${propsDefault} });`
-      : `${propsTypeTem};`
+      ? `withDefaults(${propsTypeTem}, { ${propsDefault} });\n`
+      : `${propsTypeTem};\n`
   }`;
-  return {
-    ...visitCb,
-    ...visitStrCb,
-  };
+  return MyVisitor;
 }
 
 export default transformProps;

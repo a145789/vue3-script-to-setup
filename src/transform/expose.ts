@@ -1,6 +1,13 @@
-import { Config, SetupAst, VisitorCb } from "../constants";
+import { Config, SetupAst } from "../constants";
 import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
-import { Statement } from "@swc/core";
+import {
+  ExportDefaultExpression,
+  KeyValueProperty,
+  MethodProperty,
+  Statement,
+} from "@swc/core";
+import { Visitor } from "@swc/core/Visitor.js";
+import type MagicString from "magic-string";
 
 function transformExpose(setupAst: SetupAst, config: Config) {
   const { setupScript, offset, fileAbsolutePath } = config;
@@ -32,9 +39,13 @@ function transformExpose(setupAst: SetupAst, config: Config) {
       })
       .filter((s) => Boolean(s.trim()));
   }
-
-  const visitCb: VisitorCb = {
-    visitMethodProperty(n) {
+  class MyVisitor extends Visitor {
+    ms: MagicString;
+    constructor(ms: MagicString) {
+      super();
+      this.ms = ms;
+    }
+    visitMethodProperty(n: MethodProperty) {
       if (n.key.type === "Identifier" && n.key.value === "setup") {
         if (n.body) {
           n.body.stmts = this.myVisitStatements(n.body.stmts);
@@ -42,8 +53,8 @@ function transformExpose(setupAst: SetupAst, config: Config) {
       }
 
       return n;
-    },
-    visitKeyValueProperty(n) {
+    }
+    visitKeyValueProperty(n: KeyValueProperty) {
       if (
         n.key.type === "Identifier" &&
         n.key.value === "setup" &&
@@ -54,7 +65,7 @@ function transformExpose(setupAst: SetupAst, config: Config) {
         }
       }
       return n;
-    },
+    }
     myVisitStatements(stmts: Statement[]): Statement[] {
       for (const stmt of stmts) {
         if (
@@ -63,25 +74,25 @@ function transformExpose(setupAst: SetupAst, config: Config) {
           stmt.expression.callee.type === "Identifier" &&
           stmt.expression.callee.value === name
         ) {
-          this.ms?.remove(stmt.span.start - offset, stmt.span.end - offset);
+          this.ms.remove(stmt.span.start - offset, stmt.span.end - offset);
         }
       }
       return stmts;
-    },
-    visitExportDefaultExpression(node) {
+    }
+    visitExportDefaultExpression(node: ExportDefaultExpression) {
       const {
-        span: { start },
+        span: { end },
       } = node;
-      this.ms?.appendLeft(
-        start - offset,
-        `const ${name} = defineExpose({${exposeArg.join(",")}});`,
+      this.ms.appendRight(
+        end - offset,
+        `defineExpose({${exposeArg.join(",")}});\n`,
       );
 
       return node;
-    },
-  };
+    }
+  }
 
-  return visitCb;
+  return MyVisitor;
 }
 
 export default transformExpose;

@@ -1,7 +1,14 @@
-import type { Identifier, ArrayExpression, ObjectExpression } from "@swc/core";
+import type {
+  Identifier,
+  ArrayExpression,
+  ObjectExpression,
+  ExportDefaultExpression,
+} from "@swc/core";
 
-import { Config, SetupAst, VisitorCb } from "../constants";
+import { Config, SetupAst } from "../constants";
 import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
+import { Visitor } from "@swc/core/Visitor.js";
+import type MagicString from "magic-string";
 
 function transformEmits(
   emitsAst: ArrayExpression | ObjectExpression | Identifier,
@@ -16,16 +23,21 @@ function transformEmits(
 
   const preCode = `const ${name} = `;
   let str = "";
-  const visitStrCb: VisitorCb = {
-    visitExportDefaultExpression(node) {
+  class MyVisitor extends Visitor {
+    ms: MagicString;
+    constructor(ms: MagicString) {
+      super();
+      this.ms = ms;
+    }
+    visitExportDefaultExpression(node: ExportDefaultExpression) {
       const {
         span: { start },
       } = node;
-      this.ms?.appendLeft(start - offset, str);
+      this.ms.appendLeft(start - offset, str);
 
       return node;
-    },
-  };
+    }
+  }
 
   if (emitsAst.type === "ObjectExpression") {
     const {
@@ -34,14 +46,14 @@ function transformEmits(
     str = `${preCode}defineEmits(${script.slice(
       start - offset,
       end - offset,
-    )});`;
+    )});\n`;
 
-    return visitStrCb;
+    return MyVisitor;
   }
 
   if (emitsAst.type === "Identifier") {
     str = `${preCode}defineEmits(${emitsAst.value});`;
-    return visitStrCb;
+    return MyVisitor;
   }
 
   let emitNames: string[] = [];
@@ -66,8 +78,8 @@ function transformEmits(
     return script.slice(start - offset, end - offset);
   });
 
-  str = `${preCode}defineEmits([${[...keys, ...emitNames].join(", ")}]);`;
-  return visitStrCb;
+  str = `${preCode}defineEmits([${[...keys, ...emitNames].join(", ")}]);\n`;
+  return MyVisitor;
 }
 
 export default transformEmits;

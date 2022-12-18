@@ -1,5 +1,6 @@
 {
   "linter": {
+    "ignore": ["./node_modules/**"],
     "enabled": true,
     "rules": {
       "recommended": true,

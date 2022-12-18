@@ -1,5 +1,12 @@
-import type { ArrayExpression, Identifier, ObjectExpression } from "@swc/core";
-import { Config, SetupAst, VisitorCb } from "../constants";
+import type {
+  ArrayExpression,
+  ExportDefaultExpression,
+  Identifier,
+  ObjectExpression,
+} from "@swc/core";
+import { Config, SetupAst } from "../constants";
+import { Visitor } from "@swc/core/Visitor.js";
+import type MagicString from "magic-string";
 
 function transformComponents(
   componentsAst: ArrayExpression | Identifier | ObjectExpression,
@@ -33,16 +40,22 @@ function transformComponents(
   if (!str) {
     return;
   } else {
-    return {
-      visitExportDefaultExpression(node) {
+    class MyVisitor extends Visitor {
+      ms: MagicString;
+      constructor(ms: MagicString) {
+        super();
+        this.ms = ms;
+      }
+      visitExportDefaultExpression(node: ExportDefaultExpression) {
         const {
           span: { start },
         } = node;
-        this.ms?.appendLeft(start - offset, str);
+        this.ms.appendLeft(start - offset, str);
 
         return node;
-      },
-    } as VisitorCb;
+      }
+    }
+    return MyVisitor;
   }
 }
 
