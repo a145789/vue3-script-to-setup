@@ -10,7 +10,6 @@ on:
 
 jobs:
   publish-npm:
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,8 +20,7 @@ jobs:
           node-version: '16'
           registry-url: https://registry.npmjs.org/
       - run: npm i -g pnpm
-      - run: pnpm install
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm release
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-          
