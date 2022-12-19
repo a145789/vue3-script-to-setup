@@ -5,12 +5,12 @@ name: Publish
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   publish-npm:
-    if: "contains(github.event.head_commit.message, '[tag')"
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,25 +20,9 @@ jobs:
         with:
           node-version: '16'
           registry-url: https://registry.npmjs.org/
-          cache: pnpm
-
-      - name: Setup
-        run: npm i -g @antfu/ni
-
-      - name: Install
-        run: nci
-
-      - if: "contains(github.event.head_commit.message, '[tag major]')"
-        run: nr re-major
-      - if: "contains(github.event.head_commit.message, '[tag minor]')"
-        run: nr re-minor
-      - if: "contains(github.event.head_commit.message, '[tag patch]')"
-        run: nr re-patch
-        
-      - run: git push --follow-tags origin main
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - run: nr release
+      - run: npm i -g pnpm
+      - run: pnpm install
+      - run: pnpm release
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          
