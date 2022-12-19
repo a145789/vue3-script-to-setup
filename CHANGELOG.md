@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.1...v0.0.2) (2022-12-19)
+
+
+### Features
+
+* rewrite transform ([a5348af](https://github.com/a145789/vue3-script-to-setup/commit/a5348af30b03f6331172c676e728464b6665af19))
+* use magic string transform code ([b8e8eba](https://github.com/a145789/vue3-script-to-setup/commit/b8e8ebaf4a58ad82a720d4c3b18a15235743f643))
+
 ### 0.0.1 (2022-12-13)
 
 
