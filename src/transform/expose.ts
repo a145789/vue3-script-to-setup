@@ -1,5 +1,9 @@
 import { Config, SetupAst } from "../constants";
-import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
+import {
+  GetCallExpressionFirstArg,
+  getRealSpan,
+  getSetupSecondParams,
+} from "../utils";
 import {
   ExportDefaultExpression,
   KeyValueProperty,
@@ -74,19 +78,15 @@ function transformExpose(setupAst: SetupAst, config: Config) {
           stmt.expression.callee.type === "Identifier" &&
           stmt.expression.callee.value === name
         ) {
-          this.ms.remove(stmt.span.start - offset, stmt.span.end - offset);
+          const { start, end } = getRealSpan(stmt.span, offset);
+          this.ms.remove(start, end);
         }
       }
       return stmts;
     }
     visitExportDefaultExpression(node: ExportDefaultExpression) {
-      const {
-        span: { end },
-      } = node;
-      this.ms.appendRight(
-        end - offset,
-        `defineExpose({${exposeArg.join(",")}});\n`,
-      );
+      const { end } = getRealSpan(node.span, offset);
+      this.ms.appendRight(end, `defineExpose({${exposeArg.join(",")}});\n`);
 
       return node;
     }

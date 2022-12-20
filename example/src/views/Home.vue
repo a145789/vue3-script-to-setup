@@ -9,6 +9,7 @@ export default {
     Tab,
   },
   props: {
+    // 源数据
     source: {
       type: String as PropType<"Main" | "visitor">
     },

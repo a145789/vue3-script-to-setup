@@ -6,7 +6,7 @@ import type {
   ObjectExpression,
 } from "@swc/core";
 import { Config, SetupAst } from "../constants";
-import { output } from "../utils";
+import { getRealSpan, output } from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
@@ -46,13 +46,12 @@ function transformDirectives(
     if (c.type === "KeyValueProperty" && c.key.type !== "Computed") {
       const key = String(c.key.value);
 
-      const {
-        span: { start, end },
-      } = c.value as Identifier;
+      const { span } = c.value as Identifier;
 
+      const { start, end } = getRealSpan(span, offset);
       p += `const v${
         key.slice(0, 1).toLocaleUpperCase() + key.slice(1)
-      } = ${script.slice(start - offset, end - offset)};\n`;
+      } = ${script.slice(start, end)};\n`;
     }
 
     return p;
@@ -64,38 +63,27 @@ function transformDirectives(
       this.ms = ms;
     }
     visitImportDefaultSpecifier(n: ImportDefaultSpecifier) {
-      const {
-        value,
-        span: { start, end },
-      } = n.local;
+      const { value, span } = n.local;
+      const { start, end } = getRealSpan(span, offset);
       if (importDirective.includes(value)) {
-        this.ms.update(
-          start - offset,
-          end - offset,
-          transformDirectiveName(value),
-        );
+        this.ms.update(start, end, transformDirectiveName(value));
       }
       return n;
     }
     visitNamedImportSpecifier(n: NamedImportSpecifier) {
       const {
-        local: { value, span: { start, end } },
+        local: { value, span },
         imported,
       } = n;
       if (!imported) {
         if (importDirective.includes(value)) {
-          this.ms.appendRight(
-            end - offset,
-            ` as ${transformDirectiveName(value)}`,
-          );
+          const { end } = getRealSpan(span, offset);
+          this.ms.appendRight(end, ` as ${transformDirectiveName(value)}`);
         }
       } else {
         if (importDirective.includes(value)) {
-          this.ms.update(
-            start - offset,
-            end - offset,
-            transformDirectiveName(value),
-          );
+          const { start, end } = getRealSpan(span, offset);
+          this.ms.update(start, end, transformDirectiveName(value));
         }
       }
       return n;
@@ -104,13 +92,9 @@ function transformDirectives(
       if (!customDirective) {
         return n;
       }
-      const {
-        span: { start },
-      } = n;
-      this.ms.appendLeft(
-        start - offset,
-        `// custom directive \n${customDirective}`,
-      );
+
+      const { start } = getRealSpan(n.span, offset);
+      this.ms.appendLeft(start, `// custom directive \n${customDirective}`);
 
       return n;
     }

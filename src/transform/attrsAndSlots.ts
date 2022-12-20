@@ -4,7 +4,7 @@ import type {
   ImportSpecifier,
 } from "@swc/core";
 import { Config, SetupAst } from "../constants";
-import { getSetupSecondParams } from "../utils";
+import { getRealSpan, getSetupSecondParams } from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
@@ -57,12 +57,9 @@ function transformAttrsAndSlots(
       const firstNode = n[0];
 
       if (firstNode) {
-        const {
-          span: { start },
-        } = firstNode;
-
+        const { start } = getRealSpan(firstNode.span, offset);
         ms.appendLeft(
-          start - offset,
+          start,
           `${!attrs ? "useAttrs, " : ""}${!slots ? "useSlots, " : ""}`,
         );
       }
@@ -78,11 +75,9 @@ function transformAttrsAndSlots(
         return node;
       }
 
-      const {
-        span: { start },
-      } = node;
+      const { start } = getRealSpan(node.span, offset);
       ms.appendLeft(
-        start - offset,
+        start,
         `\n${!attrs ? `const ${attrsName} = useAttrs();\n` : ""}${
           !slots ? `const ${slotsName} = useSlots();\n` : ""
         }\n`,

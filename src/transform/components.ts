@@ -7,6 +7,7 @@ import type {
 import { Config, SetupAst } from "../constants";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
+import { getRealSpan } from "../utils";
 
 function transformComponents(
   componentsAst: ArrayExpression | Identifier | ObjectExpression,
@@ -27,11 +28,10 @@ function transformComponents(
     if (c.type === "KeyValueProperty" && c.key.type !== "Computed") {
       const key = c.key.value;
 
-      const {
-        span: { start, end },
-      } = c.value as Identifier;
+      const { span } = c.value as Identifier;
 
-      p += `const ${key} = ${script.slice(start - offset, end - offset)};\n`;
+      const { start, end } = getRealSpan(span, offset);
+      p += `const ${key} = ${script.slice(start, end)};\n`;
     }
 
     return p;
@@ -47,10 +47,8 @@ function transformComponents(
         this.ms = ms;
       }
       visitExportDefaultExpression(node: ExportDefaultExpression) {
-        const {
-          span: { start },
-        } = node;
-        this.ms.appendLeft(start - offset, str);
+        const { start } = getRealSpan(node.span, offset);
+        this.ms.appendLeft(start, str);
 
         return node;
       }

@@ -10,6 +10,7 @@ import type {
   ImportDeclaration,
   KeyValuePatternProperty,
   ObjectPattern,
+  Span,
   TsType,
   TsTypeReference,
 } from "@swc/core";
@@ -106,24 +107,16 @@ export function getPropsValueIdentifier(
   }
 
   if (ast.type === "TsAsExpression") {
-    const {
-      span: { start, end },
-    } = (ast.typeAnnotation as TsTypeReference).typeParams!.params[0];
-
-    return `${keyValue}${required ? "" : "?"}: ${script.slice(
-      start - offset,
-      end - offset,
-    )}; `;
+    const { span } = (ast.typeAnnotation as TsTypeReference).typeParams!
+      .params[0];
+    const { start, end } = getRealSpan(span, offset);
+    return `${keyValue}${required ? "" : "?"}: ${script.slice(start, end)}; `;
   }
 
   if (ast.type === "ArrayExpression") {
-    const {
-      span: { start, end },
-    } = ast;
-    return `${keyValue}${required ? "" : "?"}: ${script.slice(
-      start - offset,
-      end - offset,
-    )}; `;
+    const { span } = ast;
+    const { start, end } = getRealSpan(span, offset);
+    return `${keyValue}${required ? "" : "?"}: ${script.slice(start, end)}; `;
   }
   return "";
 }
@@ -259,16 +252,62 @@ export function getSpecifierOffset(
   const { specifiers } = n;
   const ast = specifiers[index];
   let end = ast.span.end;
+  const span = getRealSpan({ start: ast.span.start, end: n.span.end }, offset);
   if (index + 1 === specifiers.length) {
-    const commaIdx = script
-      .slice(ast.span.start - offset, n.span.end - offset)
-      .indexOf(",");
+    const commaIdx = script.slice(span.start, span.end).indexOf(",");
     if (commaIdx !== -1) {
-      end = ast.span.start + 1;
+      end = span.start + 1;
     }
   } else {
-    end = specifiers[index + 1].span.start;
+    end = getRealSpan(specifiers[index + 1].span, offset).start;
   }
 
-  return { start: ast.span.start, end };
+  return { start: span.start, end };
+}
+
+function isUniCode(str: string) {
+  return str.charCodeAt(0) > 127;
+}
+
+function getUniCodeLen(str: string) {
+  return new TextEncoder().encode(str).length;
+}
+
+let unicodeMap: Map<number, number> = new Map();
+let scripts: string;
+export function genScriptUnicodeMap(script: string, offset: number) {
+  scripts = script;
+  if (unicodeMap.size !== 0) {
+    unicodeMap = new Map();
+  }
+  let ind = 0;
+  for (let i = 0, len = script.length; i < len; i++) {
+    const str = script[i];
+    if (isUniCode(str)) {
+      ind += getUniCodeLen(str) - 1;
+      unicodeMap.set(i + offset, ind);
+    }
+  }
+}
+
+export function getRealSpan(
+  { start, end }: Omit<Span, "ctxt">,
+  offset: number,
+) {
+  if (!unicodeMap) {
+    return { start: start - offset, end: end - offset };
+  } else {
+    let realStart = start;
+    let realEnd = end;
+    unicodeMap.forEach((value, key) => {
+      if (start > key) {
+        realStart = start - value;
+      }
+      if (end > key) {
+        realEnd = end - value;
+      }
+    });
+
+    return { start: realStart - offset, end: realEnd - offset };
+  }
 }

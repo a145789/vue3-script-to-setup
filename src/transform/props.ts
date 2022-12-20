@@ -8,7 +8,11 @@ import type {
   ObjectExpression,
 } from "@swc/core";
 import { Config, FileType, SetupAst } from "../constants";
-import { getPropsValueIdentifier, getSpecifierOffset } from "../utils";
+import {
+  getPropsValueIdentifier,
+  getRealSpan,
+  getSpecifierOffset,
+} from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
@@ -40,10 +44,8 @@ function transformProps(
       this.ms = ms;
     }
     visitExportDefaultExpression(node: ExportDefaultExpression) {
-      const {
-        span: { start },
-      } = node;
-      this.ms.appendLeft(start - offset, str);
+      const { start } = getRealSpan(node.span, offset);
+      this.ms.appendLeft(start, str);
 
       return node;
     }
@@ -57,8 +59,7 @@ function transformProps(
         );
         if (index !== -1) {
           const { start, end } = getSpecifierOffset(n, index, script, offset);
-
-          this.ms.remove(start - offset, end - offset);
+          this.ms.remove(start, end);
         }
       }
 
@@ -66,14 +67,8 @@ function transformProps(
     }
   }
   if (propsAst.type === "ArrayExpression") {
-    const {
-      span: { start, end },
-    } = propsAst;
-
-    str = `${preCode}defineProps(${script.slice(
-      start - offset,
-      end - offset,
-    )});\n`;
+    const { start, end } = getRealSpan(propsAst.span, offset);
+    str = `${preCode}defineProps(${script.slice(start, end)});\n`;
     return MyVisitor;
   }
   if (propsAst.type === "Identifier") {
@@ -115,13 +110,8 @@ function transformProps(
     );
 
   if (isNormalProps) {
-    const {
-      span: { start, end },
-    } = propsAst;
-    str = `${preCode}defineProps(${script.slice(
-      start - offset,
-      end - offset,
-    )});\n`;
+    const { start, end } = getRealSpan(propsAst.span, offset);
+    str = `${preCode}defineProps(${script.slice(start, end)});\n`;
     return MyVisitor;
   }
 
@@ -168,10 +158,9 @@ function transformProps(
         }
 
         if (typeKeyValue === "default") {
-          const {
-            span: { start, end },
-          } = c.value as Identifier;
-          p.defaultProp = script.slice(start - offset, end - offset);
+          const { span } = c.value as Identifier;
+          const { start, end } = getRealSpan(span, offset);
+          p.defaultProp = script.slice(start, end);
         }
         return p;
       }, {});

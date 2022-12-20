@@ -16,7 +16,13 @@ import type {
 import { parseSync } from "@swc/core";
 
 import { Config, parseOption } from "../constants";
-import { getSpecifierOffset, MapVisitor, output } from "../utils";
+import {
+  genScriptUnicodeMap,
+  getRealSpan,
+  getSpecifierOffset,
+  MapVisitor,
+  output,
+} from "../utils";
 import transformComponents from "./components";
 import transformDirectives from "./directives";
 import transformEmits from "./emits";
@@ -66,6 +72,7 @@ function transformScript(config: Config) {
   } = program;
 
   config.offset = start;
+  genScriptUnicodeMap(config.script, start);
 
   const exportDefaultAst = body.find(
     (item) => item.type === "ExportDefaultExpression",
@@ -235,7 +242,8 @@ function transformScript(config: Config) {
 
       for (const ast of items) {
         if (ast.type === "ReturnStatement") {
-          this.ms.remove(ast.span.start - offset, ast.span.end - offset);
+          const { start, end } = getRealSpan(ast.span, offset);
+          this.ms.remove(start, end);
           break;
         }
       }
@@ -243,8 +251,13 @@ function transformScript(config: Config) {
       const firstNode = items[0];
       const lastNode = items[items.length - 1];
       if (firstNode) {
-        this.ms.remove(start - offset, firstNode.span.start - offset);
-        this.ms.remove(lastNode.span.end - offset, end - offset);
+        const frontSpan = getRealSpan(
+          { start, end: firstNode.span.start },
+          offset,
+        );
+        this.ms.remove(frontSpan.start, frontSpan.end);
+        const rearSpan = getRealSpan({ start: lastNode.span.end, end }, offset);
+        this.ms.remove(rearSpan.start, rearSpan.end);
       }
 
       return items;
@@ -279,7 +292,7 @@ function transformScript(config: Config) {
         );
         if (index !== -1) {
           const { start, end } = getSpecifierOffset(n, index, script, offset);
-          this.ms.remove(start - offset, end - offset);
+          this.ms.remove(start, end);
         }
       }
 
@@ -305,7 +318,7 @@ function transformScript(config: Config) {
     visitor.visitProgram(program);
   }
 
-  return ms.toString();
+  return `${ms.toString()}\n`;
 }
 
 export default transformScript;

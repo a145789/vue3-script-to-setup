@@ -6,7 +6,11 @@ import type {
 } from "@swc/core";
 
 import { Config, SetupAst } from "../constants";
-import { GetCallExpressionFirstArg, getSetupSecondParams } from "../utils";
+import {
+  GetCallExpressionFirstArg,
+  getRealSpan,
+  getSetupSecondParams,
+} from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
@@ -30,23 +34,16 @@ function transformEmits(
       this.ms = ms;
     }
     visitExportDefaultExpression(node: ExportDefaultExpression) {
-      const {
-        span: { start },
-      } = node;
-      this.ms.appendLeft(start - offset, str);
+      const { start } = getRealSpan(node.span, offset);
+      this.ms.appendLeft(start, str);
 
       return node;
     }
   }
 
   if (emitsAst.type === "ObjectExpression") {
-    const {
-      span: { start, end },
-    } = emitsAst;
-    str = `${preCode}defineEmits(${script.slice(
-      start - offset,
-      end - offset,
-    )});\n`;
+    const { start, end } = getRealSpan(emitsAst.span, offset);
+    str = `${preCode}defineEmits(${script.slice(start, end)});\n`;
 
     return MyVisitor;
   }
@@ -72,10 +69,9 @@ function transformEmits(
   }
 
   const keys = emitsAst.elements.map((ast) => {
-    const {
-      span: { start, end },
-    } = ast!.expression as Identifier;
-    return script.slice(start - offset, end - offset);
+    const { span } = ast!.expression as Identifier;
+    const { start, end } = getRealSpan(span, offset);
+    return script.slice(start, end);
   });
 
   str = `${preCode}defineEmits([${[...keys, ...emitNames].join(", ")}]);\n`;
