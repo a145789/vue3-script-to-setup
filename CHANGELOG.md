@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.3...v0.0.4) (2022-12-20)
+
+
+### Bug Fixes
+
+* rust & js unicode length inconsistency ([7864b63](https://github.com/a145789/vue3-script-to-setup/commit/7864b63cd9fdd9d5f3ca30f9cf8fa622b96c8ffd))
+
 ### [0.0.3](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.2...v0.0.3) (2022-12-19)
 
 ### [0.0.2](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.1...v0.0.2) (2022-12-19)
