@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.4...v0.1.0) (2022-12-21)
+
+
+### Features
+
+* processing for props emits of the same name ([e992f3e](https://github.com/a145789/vue3-script-to-setup/commit/e992f3e59100a1115d3234fe5bdd0b58110f8fa1))
+
+
+### Bug Fixes
+
+* emits name de-duplication ([6b09c1d](https://github.com/a145789/vue3-script-to-setup/commit/6b09c1d3df53b1196a21d8485dac441d4acd6f9a))
+* import only when attrs or slots are required ([c3607c9](https://github.com/a145789/vue3-script-to-setup/commit/c3607c99b0f6b112a80a883615cda33e22786436))
+* offset calculation error ([92f0031](https://github.com/a145789/vue3-script-to-setup/commit/92f003192cc4884e36a24a274a80e21058271219))
+
 ### [0.0.4](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.3...v0.0.4) (2022-12-20)
 
 
