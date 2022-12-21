@@ -60,12 +60,12 @@
     "rome": "^11.0.0",
     "standard-version": "^9.5.0",
     "typescript": "^4.9.4",
-    "vite": "^4.0.1",
-    "vitest": "^0.25.7",
+    "vite": "^4.0.2",
+    "vitest": "^0.26.1",
     "tsup": "^6.5.0"
   },
   "dependencies": {
-    "@swc/core": "^1.3.22",
+    "@swc/core": "^1.3.24",
     "colorette": "^2.0.19",
     "fast-glob": "^3.2.12",
     "find-up": "^6.3.0",
