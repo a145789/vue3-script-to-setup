@@ -20,10 +20,6 @@ function transformAttrsAndSlots(
 
   class MyVisitor extends Visitor {
     ms: MagicString;
-    isHas = {
-      attrs: false,
-      slots: false,
-    };
     constructor(ms: MagicString) {
       super();
       this.ms = ms;
@@ -35,34 +31,36 @@ function transformAttrsAndSlots(
       return n;
     }
     myVisitImportSpecifiers(n: ImportSpecifier[]) {
-      this.isHas = n.reduce((p, ast) => {
-        if (ast.type === "ImportSpecifier") {
-          if (ast.local.value === "useAttrs") {
-            p.attrs = true;
+      const { attrs, slots } = n.reduce(
+        (p, ast) => {
+          if (ast.type === "ImportSpecifier") {
+            if (ast.local.value === "useAttrs") {
+              p.attrs = true;
+            }
+
+            if (ast.local.value === "useSlots") {
+              p.slots = true;
+            }
           }
 
-          if (ast.local.value === "useSlots") {
-            p.slots = true;
-          }
-        }
-
-        return p;
-      }, this.isHas);
-
-      const {
-        ms,
-        isHas: { attrs, slots },
-      } = this;
+          return p;
+        },
+        {
+          attrs: false,
+          slots: false,
+        },
+      );
 
       const firstNode = n[0];
-
       if (firstNode) {
         const { start } = getRealSpan(firstNode.span, offset);
-        ms.appendLeft(
+        this.ms.appendLeft(
           start,
-          `${!attrs ? "useAttrs, " : ""}${!slots ? "useSlots, " : ""}`,
+          `${!attrs && attrsName ? "useAttrs, " : ""}${
+            !slots && slotsName ? "useSlots, " : ""
+          }`,
         );
-        if (!attrs) {
+        if (!attrs && attrsName) {
           n.unshift({
             type: "ImportSpecifier",
             span: {
@@ -83,7 +81,7 @@ function transformAttrsAndSlots(
             isTypeOnly: false,
           });
         }
-        if (!slots) {
+        if (!slots && slotsName) {
           n.unshift({
             type: "ImportSpecifier",
             span: {
@@ -109,19 +107,11 @@ function transformAttrsAndSlots(
       return n;
     }
     visitExportDefaultExpression(node: ExportDefaultExpression) {
-      const {
-        ms,
-        isHas: { attrs, slots },
-      } = this;
-      if (attrs && slots) {
-        return node;
-      }
-
       const { start } = getRealSpan(node.span, offset);
-      ms.appendLeft(
+      this.ms.appendLeft(
         start,
-        `\n${!attrs ? `const ${attrsName} = useAttrs();\n` : ""}${
-          !slots ? `const ${slotsName} = useSlots();\n` : ""
+        `\n${attrsName ? `const ${attrsName} = useAttrs();\n` : ""}${
+          slotsName ? `const ${slotsName} = useSlots();\n` : ""
         }\n`,
       );
 
