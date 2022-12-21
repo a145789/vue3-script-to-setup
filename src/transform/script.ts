@@ -170,10 +170,11 @@ function transformScript(config: Config) {
       return null;
     }
     try {
+      const value = ast.type === "Identifier" ? ast : ast.value;
       switch (key) {
         case "props": {
           transformOption.props = transformProps(
-            ast.value as ArrayExpression | Identifier | ObjectExpression,
+            value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
             config,
           );
@@ -181,7 +182,7 @@ function transformScript(config: Config) {
         }
         case "emits": {
           transformOption.emits = transformEmits(
-            ast.value as ArrayExpression | Identifier | ObjectExpression,
+            value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
             config,
           );
@@ -189,7 +190,7 @@ function transformScript(config: Config) {
         }
         case "components": {
           transformOption.components = transformComponents(
-            ast.value as ArrayExpression | Identifier | ObjectExpression,
+            value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
             config,
           );
@@ -197,7 +198,7 @@ function transformScript(config: Config) {
         }
         case "directives": {
           transformOption.directives = transformDirectives(
-            ast.value as Identifier | ObjectExpression,
+            value as Identifier | ObjectExpression,
             setupFnAst,
             config,
           );

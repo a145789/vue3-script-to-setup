@@ -4,7 +4,10 @@ import type {
   ExportDefaultExpression,
   Identifier,
   ImportDeclaration,
+  ImportDefaultSpecifier,
+  ImportSpecifier,
   KeyValueProperty,
+  NamedImportSpecifier,
   ObjectExpression,
 } from "@swc/core";
 import { Config, FileType, SetupAst } from "../constants";
@@ -24,18 +27,19 @@ function transformProps(
   const { script, offset, fileType, propsNotOnlyTs } = config;
 
   let preCode = "";
+  let propsName = "";
   if (setupAst.params.length) {
     const propsNameAst =
       setupAst.type === "MethodProperty"
         ? setupAst.params[0].pat
         : setupAst.params[0];
 
-    const propsName =
-      propsNameAst.type === "Identifier" ? propsNameAst.value : "";
+    propsName = propsNameAst.type === "Identifier" ? propsNameAst.value : "";
     preCode = propsName ? `const ${propsName} = ` : "";
   }
 
   let isNormalProps = true;
+  let isSamePropsName = false;
   let str = "";
   class MyVisitor extends Visitor {
     ms: MagicString;
@@ -66,14 +70,52 @@ function transformProps(
 
       return n;
     }
+    visitImportDefaultSpecifier(n: ImportDefaultSpecifier): ImportSpecifier {
+      if (!isSamePropsName) {
+        return n;
+      }
+      const { value, span } = n.local;
+      const { start, end } = getRealSpan(span, offset);
+      if (value === propsName) {
+        this.ms.update(start, end, `$${propsName}`);
+      }
+      return n;
+    }
+    visitNamedImportSpecifier(n: NamedImportSpecifier) {
+      if (!isSamePropsName) {
+        return n;
+      }
+      const {
+        local: { value, span },
+        imported,
+      } = n;
+      if (!imported) {
+        if (value === propsName) {
+          const { end } = getRealSpan(span, offset);
+          this.ms.appendRight(end, ` as $${propsName}`);
+        }
+      } else {
+        if (value === propsName) {
+          const { start, end } = getRealSpan(span, offset);
+          this.ms.update(start, end, `$${propsName}`);
+        }
+      }
+      return n;
+    }
   }
   if (propsAst.type === "ArrayExpression") {
     const { start, end } = getRealSpan(propsAst.span, offset);
     str = `${preCode}defineProps(${script.slice(start, end)});\n`;
     return MyVisitor;
   }
+
   if (propsAst.type === "Identifier") {
-    str = `${preCode}defineProps(${propsAst.value});\n`;
+    if (propsName !== propsAst.value) {
+      str = `${preCode}defineProps(${propsAst.value});\n`;
+    } else {
+      str = `${preCode}defineProps($${propsAst.value});\n`;
+      isSamePropsName = true;
+    }
     return MyVisitor;
   }
 
