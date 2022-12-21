@@ -74,7 +74,9 @@ function transformEmits(
     return script.slice(start, end);
   });
 
-  str = `${preCode}defineEmits([${[...keys, ...emitNames].join(", ")}]);\n`;
+  str = `${preCode}defineEmits([${[...new Set([...keys, ...emitNames])].join(
+    ", ",
+  )}]);\n`;
   return MyVisitor;
 }
 

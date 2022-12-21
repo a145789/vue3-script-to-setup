@@ -179,7 +179,7 @@ function transformScript(config: Config) {
           );
           break;
         }
-        case "emit": {
+        case "emits": {
           transformOption.emits = transformEmits(
             ast.value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
