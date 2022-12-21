@@ -62,6 +62,48 @@ function transformAttrsAndSlots(
           start,
           `${!attrs ? "useAttrs, " : ""}${!slots ? "useSlots, " : ""}`,
         );
+        if (!attrs) {
+          n.unshift({
+            type: "ImportSpecifier",
+            span: {
+              start: 41,
+              end: 50,
+              ctxt: 0,
+            },
+            local: {
+              type: "Identifier",
+              span: {
+                start: 41,
+                end: 50,
+                ctxt: 1,
+              },
+              value: "useAttrs",
+              optional: false,
+            },
+            isTypeOnly: false,
+          });
+        }
+        if (!slots) {
+          n.unshift({
+            type: "ImportSpecifier",
+            span: {
+              start: 41,
+              end: 50,
+              ctxt: 0,
+            },
+            local: {
+              type: "Identifier",
+              span: {
+                start: 41,
+                end: 50,
+                ctxt: 1,
+              },
+              value: "useSlots",
+              optional: false,
+            },
+            isTypeOnly: false,
+          });
+        }
       }
 
       return n;

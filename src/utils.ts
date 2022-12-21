@@ -274,18 +274,19 @@ function getUniCodeLen(str: string) {
 }
 
 let unicodeMap: Map<number, number> = new Map();
-let scripts: string;
 export function genScriptUnicodeMap(script: string, offset: number) {
-  scripts = script;
   if (unicodeMap.size !== 0) {
     unicodeMap = new Map();
   }
-  let ind = 0;
+  let keyOffset = 0;
+  let valueOffset = 0;
   for (let i = 0, len = script.length; i < len; i++) {
     const str = script[i];
     if (isUniCode(str)) {
-      ind += getUniCodeLen(str) - 1;
-      unicodeMap.set(i + offset, ind);
+      const len = getUniCodeLen(str);
+      keyOffset += len;
+      valueOffset += len - 1;
+      unicodeMap.set(i + keyOffset + offset, valueOffset);
     }
   }
 }
@@ -294,7 +295,7 @@ export function getRealSpan(
   { start, end }: Omit<Span, "ctxt">,
   offset: number,
 ) {
-  if (!unicodeMap) {
+  if (!unicodeMap.size) {
     return { start: start - offset, end: end - offset };
   } else {
     let realStart = start;

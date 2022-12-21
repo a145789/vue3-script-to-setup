@@ -293,6 +293,11 @@ function transformScript(config: Config) {
         if (index !== -1) {
           const { start, end } = getSpecifierOffset(n, index, script, offset);
           this.ms.remove(start, end);
+          n.specifiers.splice(index, 1);
+        }
+        if (!n.specifiers.length) {
+          const { start, end } = getRealSpan(n.span, offset);
+          this.ms.remove(start, end);
         }
       }
 

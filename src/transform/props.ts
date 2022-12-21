@@ -60,6 +60,7 @@ function transformProps(
         if (index !== -1) {
           const { start, end } = getSpecifierOffset(n, index, script, offset);
           this.ms.remove(start, end);
+          n.specifiers.splice(index, 1);
         }
       }
 
@@ -173,7 +174,7 @@ function transformProps(
     },
   );
 
-  const propsTypeTem = `defineProps<{ ${propsType.join("")}}>()`;
+  const propsTypeTem = `defineProps<{ ${propsType.join("")} }>()`;
 
   str = `${preCode}${
     propsDefault
