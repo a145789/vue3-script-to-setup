@@ -18,7 +18,7 @@ import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
 function transformEmits(
-  emitsAst: ArrayExpression | ObjectExpression | Identifier,
+  emitsAst: ArrayExpression | ObjectExpression | Identifier | null,
   setupAst: SetupAst,
   config: Config,
 ) {
@@ -78,23 +78,31 @@ function transformEmits(
     }
   }
 
-  if (emitsAst.type === "ObjectExpression") {
-    const { start, end } = getRealSpan(emitsAst.span, offset);
-    str = `${preCode}defineEmits(${script.slice(start, end)});\n`;
+  let keys: string[] = [];
+  if (emitsAst) {
+    if (emitsAst.type === "ObjectExpression") {
+      const { start, end } = getRealSpan(emitsAst.span, offset);
+      str = `${preCode}defineEmits(${script.slice(start, end)});\n`;
 
-    return MyVisitor;
-  }
-
-  if (emitsAst.type === "Identifier") {
-    if (name !== emitsAst.value) {
-      str = `${preCode}defineEmits(${emitsAst.value});\n`;
-    } else {
-      str = `${preCode}defineEmits($${emitsAst.value});\n`;
-      isSameEmitsName = true;
+      return MyVisitor;
     }
-    console.log(str);
 
-    return MyVisitor;
+    if (emitsAst.type === "Identifier") {
+      if (name !== emitsAst.value) {
+        str = `${preCode}defineEmits(${emitsAst.value});\n`;
+      } else {
+        str = `${preCode}defineEmits($${emitsAst.value});\n`;
+        isSameEmitsName = true;
+      }
+
+      return MyVisitor;
+    }
+
+    keys = emitsAst.elements.map((ast) => {
+      const { span } = ast!.expression as Identifier;
+      const { start, end } = getRealSpan(span, offset);
+      return script.slice(start, end);
+    });
   }
 
   let emitNames: string[] = [];
@@ -103,20 +111,11 @@ function transformEmits(
     visitor.visitFn(setupAst);
 
     const setupOffset = setupAst.span.start;
-
     emitNames = (visitor.firstArgAst as Identifier[]).map((ast) => {
-      const {
-        span: { start, end },
-      } = ast;
-      return setupScript.slice(start - setupOffset, end - setupOffset);
+      const { start, end } = getRealSpan(ast.span, setupOffset);
+      return setupScript.slice(start, end);
     });
   }
-
-  const keys = emitsAst.elements.map((ast) => {
-    const { span } = ast!.expression as Identifier;
-    const { start, end } = getRealSpan(span, offset);
-    return script.slice(start, end);
-  });
 
   str = `${preCode}defineEmits([${[...new Set([...keys, ...emitNames])].join(
     ", ",

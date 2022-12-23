@@ -138,9 +138,10 @@ function transformScript(config: Config) {
       ? setupAst
       : (setupAst.value as ArrowFunctionExpression);
 
+  const setupFnAstSpan = getRealSpan(setupFnAst.span, config.offset);
   config.setupScript = config.script.slice(
-    setupFnAst.span.start - config.offset,
-    setupFnAst.span.end - config.offset,
+    setupFnAstSpan.start,
+    setupFnAstSpan.end,
   );
 
   const transformOption: TransformOption = {};
@@ -216,6 +217,9 @@ function transformScript(config: Config) {
   }
 
   try {
+    if (!transformOption.emits) {
+      transformOption.emits = transformEmits(null, setupFnAst, config);
+    }
     transformOption.expose = transformExpose(setupFnAst, config);
     transformOption.attrsAndSlots = transformAttrsAndSlots(setupFnAst, config);
   } catch (error) {

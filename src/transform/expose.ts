@@ -32,14 +32,9 @@ function transformExpose(setupAst: SetupAst, config: Config) {
           return "";
         }
 
-        const {
-          span: { start, end },
-        } = ast;
+        const { start, end } = getRealSpan(ast.span, setupOffset);
 
-        return setupScript
-          .slice(start - setupOffset, end - setupOffset)
-          .replace(/{|}/g, "")
-          .split(",");
+        return setupScript.slice(start, end).replace(/{|}/g, "").split(",");
       })
       .filter((s) => Boolean(s.trim()));
   }
