@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.0...v0.1.1) (2022-12-23)
+
+
+### Features
+
+* support for emit transform only in setup functions ([f273601](https://github.com/a145789/vue3-script-to-setup/commit/f273601ef8efcd925f296f1e33905196bdb3d0d2))
+
 ## [0.1.0](https://github.com/a145789/vue3-script-to-setup/compare/v0.0.4...v0.1.0) (2022-12-21)
 
 
