@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.1...v0.1.2) (2022-12-26)
+
+
+### Features
+
+* optimize the Only-Ts display when the props type is an array ([5281eb6](https://github.com/a145789/vue3-script-to-setup/commit/5281eb67ab984cd5c3f4cd0f24c20abe99f74f38))
+
+
+### Bug Fixes
+
+* emit generates the name of the error ([a699991](https://github.com/a145789/vue3-script-to-setup/commit/a699991b8a457ee3a136a6b43589e0e1121b6c01))
+
 ### [0.1.1](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.0...v0.1.1) (2022-12-23)
 
 
