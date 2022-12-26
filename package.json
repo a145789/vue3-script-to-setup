@@ -48,9 +48,9 @@
     "dev": "esno src/setup.ts",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "re-major": "standard-version -r major",
-    "re-minor": "standard-version -r minor",
-    "re-patch": "standard-version -r patch",
+    "major": "standard-version -r major",
+    "minor": "standard-version -r minor",
+    "patch": "standard-version -r patch",
     "release": "pnpm run build && pnpm publish --access public --no-git-checks"
   },
   "devDependencies": {

@@ -115,7 +115,6 @@ function transformEmits(
       const { start, end } = getRealSpan(ast.span, offset);
       return script.slice(start, end);
     });
-    console.log(emitNames);
   }
 
   str = `${preCode}defineEmits([${[...new Set([...keys, ...emitNames])].join(
