@@ -11,11 +11,7 @@ import type {
   ObjectExpression,
 } from "@swc/core";
 import { Config, FileType, SetupAst } from "../constants";
-import {
-  getPropsValueIdentifier,
-  getRealSpan,
-  getSpecifierOffset,
-} from "../utils";
+import { getPropsValue, getRealSpan, getSpecifierOffset } from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
@@ -162,12 +158,7 @@ function transformProps(
   const propsType = (propsAst.properties as KeyValueProperty[]).map(
     ({ key, value }) => {
       const keyValue = (key as Identifier).value;
-      const valueIdentifier = getPropsValueIdentifier(
-        value,
-        keyValue,
-        script,
-        offset,
-      );
+      const valueIdentifier = getPropsValue(value, keyValue, script, offset);
       if (valueIdentifier) {
         return valueIdentifier;
       }
@@ -191,7 +182,7 @@ function transformProps(
       }>((p, c) => {
         const typeKeyValue = (c.key as Identifier).value;
         if (typeKeyValue === "type") {
-          p.propType = getPropsValueIdentifier(
+          p.propType = getPropsValue(
             c.value,
             keyValue,
             script,

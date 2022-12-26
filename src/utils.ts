@@ -80,7 +80,26 @@ function getFgVueFile(paths: string[]) {
   return fg.sync(paths).filter((p) => p.endsWith(".vue"));
 }
 
-export function getPropsValueIdentifier(
+function getPropsValueIdentifier(identifier: string) {
+  let value = "";
+  switch (identifier) {
+    case "Function":
+    case "Date": {
+      value = identifier;
+      break;
+    }
+    case "Array": {
+      value = "any[]";
+      break;
+    }
+    default: {
+      value = identifier.toLocaleLowerCase();
+      break;
+    }
+  }
+  return value;
+}
+export function getPropsValue(
   ast: Expression,
   keyValue: string,
   script: string,
@@ -88,22 +107,9 @@ export function getPropsValueIdentifier(
   required = false,
 ) {
   if (ast.type === "Identifier") {
-    let value = "";
-    switch (ast.value) {
-      case "Function":
-      case "Date": {
-        value = ast.value;
-        break;
-      }
-      case "Array": {
-        value = "any[]";
-        break;
-      }
-      default:
-        value = ast.value.toLocaleLowerCase();
-        break;
-    }
-    return `${keyValue}${required ? "" : "?"}: ${value}; `;
+    return `${keyValue}${required ? "" : "?"}: ${getPropsValueIdentifier(
+      ast.value,
+    )}; `;
   }
 
   if (ast.type === "TsAsExpression") {
@@ -114,9 +120,11 @@ export function getPropsValueIdentifier(
   }
 
   if (ast.type === "ArrayExpression") {
-    const { span } = ast;
-    const { start, end } = getRealSpan(span, offset);
-    return `${keyValue}${required ? "" : "?"}: ${script.slice(start, end)}; `;
+    return `${keyValue}${required ? "" : "?"}: ${ast.elements
+      .map((element) =>
+        getPropsValueIdentifier((element!.expression as Identifier).value),
+      )
+      .join(" | ")}; `;
   }
   return "";
 }
