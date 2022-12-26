@@ -138,12 +138,6 @@ function transformScript(config: Config) {
       ? setupAst
       : (setupAst.value as ArrowFunctionExpression);
 
-  const setupFnAstSpan = getRealSpan(setupFnAst.span, config.offset);
-  config.setupScript = config.script.slice(
-    setupFnAstSpan.start,
-    setupFnAstSpan.end,
-  );
-
   const transformOption: TransformOption = {};
   for (const ast of optionAst.properties) {
     if (ast.type === "SpreadElement") {

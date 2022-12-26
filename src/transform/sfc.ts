@@ -23,7 +23,6 @@ export function transformSfc(path: string, option: CommandsOption) {
       script: script.content.trim(),
       offset: 0,
       fileAbsolutePath: path,
-      setupScript: "",
     });
   } catch (error) {
     output.error(`transform script failed in the ${path}`);

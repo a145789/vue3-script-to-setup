@@ -223,6 +223,8 @@ export class GetCallExpressionFirstArg extends Visitor {
     ) {
       this.firstArgAst.push(n.arguments[0].expression);
     }
+
+    super.visitCallExpression(n);
     return n;
   }
 

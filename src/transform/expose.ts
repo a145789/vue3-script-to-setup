@@ -5,6 +5,7 @@ import {
   getSetupSecondParams,
 } from "../utils";
 import {
+  BlockStatement,
   ExportDefaultExpression,
   KeyValueProperty,
   MethodProperty,
@@ -14,27 +15,26 @@ import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
 function transformExpose(setupAst: SetupAst, config: Config) {
-  const { setupScript, offset, fileAbsolutePath } = config;
+  const { script, offset, fileAbsolutePath } = config;
   const name = getSetupSecondParams("expose", setupAst, fileAbsolutePath);
   if (!name) {
     return;
   }
 
   let exposeArg: string[] = [];
-  if (setupScript) {
+  if ((setupAst.body as BlockStatement)?.stmts?.length) {
     const visitor = new GetCallExpressionFirstArg(name);
     visitor.visitFn(setupAst);
 
-    const setupOffset = setupAst.span.start;
     exposeArg = visitor.firstArgAst
       .flatMap((ast) => {
         if (ast.type !== "ObjectExpression") {
           return "";
         }
 
-        const { start, end } = getRealSpan(ast.span, setupOffset);
+        const { start, end } = getRealSpan(ast.span, offset);
 
-        return setupScript.slice(start, end).replace(/{|}/g, "").split(",");
+        return script.slice(start, end).replace(/{|}/g, "").split(",");
       })
       .filter((s) => Boolean(s.trim()));
   }

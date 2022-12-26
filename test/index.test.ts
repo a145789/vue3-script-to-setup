@@ -86,7 +86,6 @@ describe("test transform script", () => {
           script: testScript1.code.trim(),
           offset: 0,
           fileAbsolutePath: "",
-          setupScript: "",
         }),
       ),
     ).toBe(transformToSingeLine(testScript1.transform.trim()));
@@ -98,7 +97,6 @@ describe("test transform script", () => {
           script: testScript2.code.trim(),
           offset: 0,
           fileAbsolutePath: "",
-          setupScript: "",
         }),
       ),
     ).toBe(transformToSingeLine(testScript2.transform.trim()));
@@ -110,7 +108,6 @@ describe("test transform script", () => {
           script: testScript3.code.trim(),
           offset: 0,
           fileAbsolutePath: "",
-          setupScript: "",
         }),
       ),
     ).toBe(transformToSingeLine(testScript3.transform.trim()));

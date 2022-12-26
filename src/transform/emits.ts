@@ -6,6 +6,7 @@ import type {
   NamedImportSpecifier,
   ImportDefaultSpecifier,
   ImportSpecifier,
+  BlockStatement,
 } from "@swc/core";
 
 import { Config, SetupAst } from "../constants";
@@ -22,7 +23,7 @@ function transformEmits(
   setupAst: SetupAst,
   config: Config,
 ) {
-  const { script, offset, setupScript, fileAbsolutePath } = config;
+  const { script, offset, fileAbsolutePath } = config;
   const name = getSetupSecondParams("emit", setupAst, fileAbsolutePath);
   if (!name) {
     return;
@@ -106,15 +107,15 @@ function transformEmits(
   }
 
   let emitNames: string[] = [];
-  if (setupScript) {
+  if ((setupAst.body as BlockStatement)?.stmts?.length) {
     const visitor = new GetCallExpressionFirstArg(name);
     visitor.visitFn(setupAst);
 
-    const setupOffset = setupAst.span.start;
     emitNames = (visitor.firstArgAst as Identifier[]).map((ast) => {
-      const { start, end } = getRealSpan(ast.span, setupOffset);
-      return setupScript.slice(start, end);
+      const { start, end } = getRealSpan(ast.span, offset);
+      return script.slice(start, end);
     });
+    console.log(emitNames);
   }
 
   str = `${preCode}defineEmits([${[...new Set([...keys, ...emitNames])].join(

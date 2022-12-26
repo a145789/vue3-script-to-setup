@@ -30,7 +30,6 @@ export interface Config {
   offset: number;
   fileAbsolutePath: string;
   propsNotOnlyTs?: boolean;
-  setupScript?: string;
 }
 
 export const parseOption = {
