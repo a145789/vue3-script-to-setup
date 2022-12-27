@@ -45,7 +45,7 @@ export default defineComponent({
 ```
 
 ```bash
-npx tosetup /src/401.vue
+npx tosetup /src/App.vue
 ```
 
 **transform code**
@@ -70,7 +70,7 @@ const mySlots = useSlots();
 
 const bar = ref(0);
         emit("change");
-const expose = defineExpose({ bar });
+ defineExpose({ bar });
 
 
 
@@ -170,23 +170,9 @@ interface DefaultOption {
 
 ## Limitations/限制
 
-Unable to transform spread syntax
-
-无法解析展开语法
-
-```js
-export default defineComponent({
-  name: 'App',
-  directives: {
-    ...directives
-  },
-  emit: ["click"],
-  setup(props, { emit, ...options }) {
-    return {}
-  }
-})
-```
 Unable to transform `TypeScript-only Features` of `defineEmits`, support only
+
+无法将 `defineEmits` 转换为 `TypeScript-only Features` 模式，仅支持转换为数组
 
 ```ts
 const emit = defineEmits(['change', 'delete'])
@@ -209,8 +195,33 @@ export default {
 export default {
   mounted() {
     // Child.vue is script code, it`s work
-    // Child.vue is setup code, foo is undefined
+    // Child.vue is setup code, foo is undefined, need `expose({ foo })`
     this.$refs.child.foo()
   }
 }
+```
+
+## Not supported/不支持
+
+```ts
+export default defineComponent({
+  name: 'App',
+  ...optoons,  // ❌
+  directives: {
+    ...directives,  // ❌
+  },
+  emit: ["click"],
+  // ...options ❌
+  setup(props, { emit, ...options }) {
+    const obj = reactive({ a, b, c })
+    options.expose() // ❌
+    
+    const { ... } = toRefs(obj) // ✅
+    function handle() {} // ✅
+    return {
+      ...toRefs(obj),  // ❌
+      handle() {}, // ❌
+    }
+  }
+})
 ```
