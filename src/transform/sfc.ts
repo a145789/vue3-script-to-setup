@@ -12,6 +12,7 @@ export function transformSfc(path: string, option: CommandsOption) {
   } = parse(sfc);
 
   if (scriptSetup || !script) {
+    output.log(`skip ${path}`);
     return null;
   }
 
@@ -38,6 +39,7 @@ export function transformSfc(path: string, option: CommandsOption) {
 
       return ms.toString();
     } else {
+      output.error(`File ${path} transform failure.\n`);
       return null;
     }
   }

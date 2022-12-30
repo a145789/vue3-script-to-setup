@@ -7,7 +7,7 @@ import writeFile from "./writeFile";
 const CONFIG_FILE_NAME = "tosetup.config" as const;
 
 async function setup() {
-  output.log("tosetup begin...\n");
+  const start = Date.now();
   const argv = process.argv.slice(2).filter(Boolean);
 
   let { pathNames, commands } = argv.reduce<{
@@ -66,11 +66,10 @@ async function setup() {
         output.error(`write ${path} failure.\n`);
         console.log(error);
       }
-    } else {
-      output.error(`File ${path} transform failure.\n`);
     }
   }
-  output.log("\ntosetup end.");
+
+  output.log(`Done in ${Math.floor(Date.now() - start)}ms.`);
 }
 
 setup();
