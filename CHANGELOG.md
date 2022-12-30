@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.2...v0.1.3) (2022-12-30)
+
+
+### Features
+
+* optimize skipping the unwanted transform file prompt ([341649b](https://github.com/a145789/vue3-script-to-setup/commit/341649b4b5cc43156cf45c9c5705865e50cecda9))
+
 ### [0.1.2](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.1...v0.1.2) (2022-12-26)
 
 
