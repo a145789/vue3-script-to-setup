@@ -41,7 +41,10 @@ async function setup() {
   );
 
   if (!pathNames.length) {
-    const configPath = findUpSync(CONFIG_FILE_NAME);
+    const configPath = findUpSync([
+      `${CONFIG_FILE_NAME}.js`,
+      `${CONFIG_FILE_NAME}.ts`,
+    ]);
     if (!configPath) {
       output.error(
         `Please enter a file path or use a ${CONFIG_FILE_NAME} file.`,
