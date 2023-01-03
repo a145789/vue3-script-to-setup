@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.3...v0.1.4) (2023-01-03)
+
+
+### Bug Fixes
+
+* can't find tosetup.config ([a5183f0](https://github.com/a145789/vue3-script-to-setup/commit/a5183f0f81e577d497917a3cbeb292e061cb2372))
+
 ### [0.1.3](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.2...v0.1.3) (2022-12-30)
 
 
