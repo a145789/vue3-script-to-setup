@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 "use strict";
-import "../dist/setup.js";
+import "../dist/setup.mjs";
