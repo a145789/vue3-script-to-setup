@@ -261,7 +261,7 @@ export function getSpecifierOffset(
 ) {
   const { specifiers } = n;
   const ast = specifiers[index];
-  let end = ast.span.end;
+  let { end } = getRealSpan({ start: 0, end: ast.span.end }, offset);
   const span = getRealSpan({ start: ast.span.start, end: n.span.end }, offset);
   if (index + 1 === specifiers.length) {
     const commaIdx = script.slice(span.start, span.end).indexOf(",");
