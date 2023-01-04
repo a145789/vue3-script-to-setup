@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.4...v0.1.5) (2023-01-04)
+
+
+### Bug Fixes
+
+* span calculation error in multi-file mode ([6f39c09](https://github.com/a145789/vue3-script-to-setup/commit/6f39c09922067f5cf1d23494c67caee2ead7f553))
+
 ### [0.1.4](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.3...v0.1.4) (2023-01-03)
 
 
