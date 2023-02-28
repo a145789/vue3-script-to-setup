@@ -1,12 +1,14 @@
 import { parse } from "vue/compiler-sfc";
-import { readFileSync } from "fs";
 import { CommandsOption, FileType } from "../constants";
 import transformScript from "./script";
 import { output } from "../utils";
 import MagicString from "magic-string";
 
-export function transformSfc(path: string, option: CommandsOption) {
-  const sfc = readFileSync(path).toString();
+export function transformSfc(
+  sfc: string,
+  option: CommandsOption,
+  path = "code",
+) {
   const {
     descriptor: { script, scriptSetup },
   } = parse(sfc);

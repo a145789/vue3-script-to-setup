@@ -3,6 +3,7 @@ import { getTheFileAbsolutePath, output, useConfigPath } from "./utils";
 import { transformSfc } from "./transform";
 import { CommandsOption } from "./constants";
 import writeFile from "./writeFile";
+import { readFileSync } from "fs";
 
 const CONFIG_FILE_NAME = "tosetup.config" as const;
 
@@ -60,7 +61,8 @@ async function setup() {
   }
   for (const path of pathNames) {
     output.log(`File ${path} start of transform...`);
-    const code = transformSfc(path, commands);
+    const sfc = readFileSync(path).toString();
+    const code = transformSfc(sfc, commands, path);
     if (code) {
       try {
         const file = writeFile(code, path, commands);
