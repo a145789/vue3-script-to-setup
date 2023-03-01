@@ -13,9 +13,7 @@ import type {
   Statement,
 } from "@swc/core";
 
-import { parseSync } from "@swc/core";
-
-import { Config, parseOption } from "../constants";
+import { Config, parseOption, ParseSyncType } from "../constants";
 import {
   genScriptUnicodeMap,
   getRealSpan,
@@ -63,8 +61,8 @@ export interface TransformOption {
   setup?: ReturnType<typeof transformProps>;
 }
 
-function transformScript(config: Config) {
-  const program = parseSync(config.script, parseOption);
+function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
+  const program = swcParseParseSync(config.script, parseOption);
 
   const {
     body,

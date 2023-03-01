@@ -16,6 +16,7 @@ import {
   transformToSingeLine,
 } from "./utils";
 import transformScript from "../src/transform/script";
+import { parseSync } from "@swc/core";
 
 describe("test utils", () => {
   it("test getTheFileAbsolutePath", () => {
@@ -81,34 +82,43 @@ describe("test transform script", () => {
   it("test", async () => {
     expect(
       transformToSingeLine(
-        transformScript({
-          fileType: FileType.ts,
-          script: testScript1.code.trim(),
-          offset: 0,
-          fileAbsolutePath: "",
-        }),
+        transformScript(
+          {
+            fileType: FileType.ts,
+            script: testScript1.code.trim(),
+            offset: 0,
+            fileAbsolutePath: "",
+          },
+          parseSync,
+        ),
       ),
     ).toBe(transformToSingeLine(testScript1.transform.trim()));
 
     expect(
       transformToSingeLine(
-        transformScript({
-          fileType: FileType.ts,
-          script: testScript2.code.trim(),
-          offset: 0,
-          fileAbsolutePath: "",
-        }),
+        transformScript(
+          {
+            fileType: FileType.ts,
+            script: testScript2.code.trim(),
+            offset: 0,
+            fileAbsolutePath: "",
+          },
+          parseSync,
+        ),
       ),
     ).toBe(transformToSingeLine(testScript2.transform.trim()));
 
     expect(
       transformToSingeLine(
-        transformScript({
-          fileType: FileType.ts,
-          script: testScript3.code.trim(),
-          offset: 0,
-          fileAbsolutePath: "",
-        }),
+        transformScript(
+          {
+            fileType: FileType.ts,
+            script: testScript3.code.trim(),
+            offset: 0,
+            fileAbsolutePath: "",
+          },
+          parseSync,
+        ),
       ),
     ).toBe(transformToSingeLine(testScript3.transform.trim()));
   });

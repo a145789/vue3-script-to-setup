@@ -59,10 +59,11 @@ async function setup() {
 
     commands = { ...commands, ...config.option };
   }
+
   for (const path of pathNames) {
     output.log(`File ${path} start of transform...`);
     const sfc = readFileSync(path).toString();
-    const code = transformSfc(sfc, commands, path);
+    const code = transformSfc(sfc, { ...commands, path });
     if (code) {
       try {
         const file = writeFile(code, path, commands);

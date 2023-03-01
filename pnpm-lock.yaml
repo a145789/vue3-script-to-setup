@@ -19,7 +19,7 @@ importers:
       unbuild: ^1.1.2
       unconfig: ^0.3.7
       vite: ^4.1.4
-      vitest: ^0.29.1
+      vitest: ^0.29.2
       vue: ^3.2.47
     dependencies:
       '@swc/core': registry.npmjs.org/@swc/core/1.3.37
@@ -39,7 +39,7 @@ importers:
       typescript: registry.npmjs.org/typescript/4.9.5
       unbuild: registry.npmjs.org/unbuild/1.1.2
       vite: registry.npmjs.org/vite/4.1.4_@types+node@18.14.2
-      vitest: registry.npmjs.org/vitest/0.29.1
+      vitest: registry.npmjs.org/vitest/0.29.2
 
 packages:
 
@@ -2662,38 +2662,38 @@ packages:
     version: 1.20.2
     dev: true
 
-  registry.npmjs.org/@vitest/expect/0.29.1:
-    resolution: {integrity: sha512-VFt1u34D+/L4pqjLA8VGPdHbdF8dgjX9Nq573L9KG6/7MIAL9jmbEIKpXudmxjoTwcyczOXRyDuUWBQHZafjoA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/expect/-/expect-0.29.1.tgz}
+  registry.npmjs.org/@vitest/expect/0.29.2:
+    resolution: {integrity: sha512-wjrdHB2ANTch3XKRhjWZN0UueFocH0cQbi2tR5Jtq60Nb3YOSmakjdAvUa2JFBu/o8Vjhj5cYbcMXkZxn1NzmA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/expect/-/expect-0.29.2.tgz}
     name: '@vitest/expect'
-    version: 0.29.1
+    version: 0.29.2
     dependencies:
-      '@vitest/spy': registry.npmjs.org/@vitest/spy/0.29.1
-      '@vitest/utils': registry.npmjs.org/@vitest/utils/0.29.1
+      '@vitest/spy': registry.npmjs.org/@vitest/spy/0.29.2
+      '@vitest/utils': registry.npmjs.org/@vitest/utils/0.29.2
       chai: registry.npmjs.org/chai/4.3.7
     dev: true
 
-  registry.npmjs.org/@vitest/runner/0.29.1:
-    resolution: {integrity: sha512-VZ6D+kWpd/LVJjvxkt79OA29FUpyrI5L/EEwoBxH5m9KmKgs1QWNgobo/CGQtIWdifLQLvZdzYEK7Qj96w/ixQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/runner/-/runner-0.29.1.tgz}
+  registry.npmjs.org/@vitest/runner/0.29.2:
+    resolution: {integrity: sha512-A1P65f5+6ru36AyHWORhuQBJrOOcmDuhzl5RsaMNFe2jEkoj0faEszQS4CtPU/LxUYVIazlUtZTY0OEZmyZBnA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/runner/-/runner-0.29.2.tgz}
     name: '@vitest/runner'
-    version: 0.29.1
+    version: 0.29.2
     dependencies:
-      '@vitest/utils': registry.npmjs.org/@vitest/utils/0.29.1
+      '@vitest/utils': registry.npmjs.org/@vitest/utils/0.29.2
       p-limit: registry.npmjs.org/p-limit/4.0.0
       pathe: registry.npmjs.org/pathe/1.1.0
     dev: true
 
-  registry.npmjs.org/@vitest/spy/0.29.1:
-    resolution: {integrity: sha512-sRXXK44pPzaizpiZOIQP7YMhxIs80J/b6v1yR3SItpxG952c8tdA7n0O2j4OsVkjiO/ZDrjAYFrXL3gq6hLx6Q==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/spy/-/spy-0.29.1.tgz}
+  registry.npmjs.org/@vitest/spy/0.29.2:
+    resolution: {integrity: sha512-Hc44ft5kaAytlGL2PyFwdAsufjbdOvHklwjNy/gy/saRbg9Kfkxfh+PklLm1H2Ib/p586RkQeNFKYuJInUssyw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/spy/-/spy-0.29.2.tgz}
     name: '@vitest/spy'
-    version: 0.29.1
+    version: 0.29.2
     dependencies:
       tinyspy: registry.npmjs.org/tinyspy/1.0.2
     dev: true
 
-  registry.npmjs.org/@vitest/utils/0.29.1:
-    resolution: {integrity: sha512-6npOEpmyE6zPS2wsWb7yX5oDpp6WY++cC5BX6/qaaMhGC3ZlPd8BbTz3RtGPi1PfPerPvfs4KqS/JDOIaB6J3w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/utils/-/utils-0.29.1.tgz}
+  registry.npmjs.org/@vitest/utils/0.29.2:
+    resolution: {integrity: sha512-F14/Uc+vCdclStS2KEoXJlOLAEyqRhnw0gM27iXw9bMTcyKRPJrQ+rlC6XZ125GIPvvKYMPpVxNhiou6PsEeYQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@vitest/utils/-/utils-0.29.2.tgz}
     name: '@vitest/utils'
-    version: 0.29.1
+    version: 0.29.2
     dependencies:
       cli-truncate: registry.npmjs.org/cli-truncate/3.1.0
       diff: registry.npmjs.org/diff/5.1.0
@@ -2813,14 +2813,6 @@ packages:
     engines: {node: '>=0.4.0'}
     dev: true
 
-  registry.npmjs.org/acorn/8.8.1:
-    resolution: {integrity: sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/acorn/-/acorn-8.8.1.tgz}
-    name: acorn
-    version: 8.8.1
-    engines: {node: '>=0.4.0'}
-    hasBin: true
-    dev: true
-
   registry.npmjs.org/acorn/8.8.2:
     resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/acorn/-/acorn-8.8.2.tgz}
     name: acorn
@@ -2938,7 +2930,7 @@ packages:
       check-error: registry.npmjs.org/check-error/1.0.2
       deep-eql: registry.npmjs.org/deep-eql/4.1.3
       get-func-name: registry.npmjs.org/get-func-name/2.0.0
-      loupe: registry.npmjs.org/loupe/2.3.4
+      loupe: registry.npmjs.org/loupe/2.3.6
       pathval: registry.npmjs.org/pathval/1.1.1
       type-detect: registry.npmjs.org/type-detect/4.0.8
     dev: true
@@ -3699,14 +3691,6 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
-  registry.npmjs.org/loupe/2.3.4:
-    resolution: {integrity: sha512-OvKfgCC2Ndby6aSTREl5aCCPTNIzlDfQZvZxNUrBrihDhL3xcrYegTblhmEiCrg2kKQz4XsFIaemE5BF4ybSaQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/loupe/-/loupe-2.3.4.tgz}
-    name: loupe
-    version: 2.3.4
-    dependencies:
-      get-func-name: registry.npmjs.org/get-func-name/2.0.0
-    dev: true
-
   registry.npmjs.org/loupe/2.3.6:
     resolution: {integrity: sha512-RaPMZKiMy8/JruncMU5Bt6na1eftNoo++R4Y+N2FrxkDVTrGvcyzFTsaGif4QTeKESheMGegbhw6iUAq+5A8zA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/loupe/-/loupe-2.3.6.tgz}
     name: loupe
@@ -4095,7 +4079,7 @@ packages:
     name: strip-literal
     version: 1.0.0
     dependencies:
-      acorn: registry.npmjs.org/acorn/8.8.1
+      acorn: registry.npmjs.org/acorn/8.8.2
     dev: true
 
   registry.npmjs.org/supports-color/5.5.0:
@@ -4250,11 +4234,11 @@ packages:
       picocolors: registry.npmjs.org/picocolors/1.0.0
     dev: true
 
-  registry.npmjs.org/vite-node/0.29.1_@types+node@18.14.2:
-    resolution: {integrity: sha512-Ey9bTlQOQrCxQN0oJ7sTg+GrU4nTMLg44iKTFCKf31ry60csqQz4E+Q04hdWhwE4cTgpxUC+zEB1kHbf5jNkFA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/vite-node/-/vite-node-0.29.1.tgz}
-    id: registry.npmjs.org/vite-node/0.29.1
+  registry.npmjs.org/vite-node/0.29.2_@types+node@18.14.2:
+    resolution: {integrity: sha512-5oe1z6wzI3gkvc4yOBbDBbgpiWiApvuN4P55E8OI131JGrSuo4X3SOZrNmZYo4R8Zkze/dhi572blX0zc+6SdA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/vite-node/-/vite-node-0.29.2.tgz}
+    id: registry.npmjs.org/vite-node/0.29.2
     name: vite-node
-    version: 0.29.1
+    version: 0.29.2
     engines: {node: '>=v14.16.0'}
     hasBin: true
     dependencies:
@@ -4311,10 +4295,10 @@ packages:
       fsevents: registry.npmjs.org/fsevents/2.3.2
     dev: true
 
-  registry.npmjs.org/vitest/0.29.1:
-    resolution: {integrity: sha512-iSy6d9VwsIn7pz5I8SjVwdTLDRGKNZCRJVzROwjt0O0cffoymKwazIZ2epyMpRGpeL5tsXAl1cjXiT7agTyVug==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/vitest/-/vitest-0.29.1.tgz}
+  registry.npmjs.org/vitest/0.29.2:
+    resolution: {integrity: sha512-ydK9IGbAvoY8wkg29DQ4ivcVviCaUi3ivuPKfZEVddMTenFHUfB8EEDXQV8+RasEk1ACFLgMUqAaDuQ/Nk+mQA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/vitest/-/vitest-0.29.2.tgz}
     name: vitest
-    version: 0.29.1
+    version: 0.29.2
     engines: {node: '>=v14.16.0'}
     hasBin: true
     peerDependencies:
@@ -4338,11 +4322,11 @@ packages:
       '@types/chai': registry.npmjs.org/@types/chai/4.3.4
       '@types/chai-subset': registry.npmjs.org/@types/chai-subset/1.3.3
       '@types/node': registry.npmjs.org/@types/node/18.14.2
-      '@vitest/expect': registry.npmjs.org/@vitest/expect/0.29.1
-      '@vitest/runner': registry.npmjs.org/@vitest/runner/0.29.1
-      '@vitest/spy': registry.npmjs.org/@vitest/spy/0.29.1
-      '@vitest/utils': registry.npmjs.org/@vitest/utils/0.29.1
-      acorn: registry.npmjs.org/acorn/8.8.1
+      '@vitest/expect': registry.npmjs.org/@vitest/expect/0.29.2
+      '@vitest/runner': registry.npmjs.org/@vitest/runner/0.29.2
+      '@vitest/spy': registry.npmjs.org/@vitest/spy/0.29.2
+      '@vitest/utils': registry.npmjs.org/@vitest/utils/0.29.2
+      acorn: registry.npmjs.org/acorn/8.8.2
       acorn-walk: registry.npmjs.org/acorn-walk/8.2.0
       cac: registry.npmjs.org/cac/6.7.14
       chai: registry.npmjs.org/chai/4.3.7
@@ -4357,7 +4341,7 @@ packages:
       tinypool: registry.npmjs.org/tinypool/0.3.1
       tinyspy: registry.npmjs.org/tinyspy/1.0.2
       vite: registry.npmjs.org/vite/4.1.4_@types+node@18.14.2
-      vite-node: registry.npmjs.org/vite-node/0.29.1_@types+node@18.14.2
+      vite-node: registry.npmjs.org/vite-node/0.29.2_@types+node@18.14.2
       why-is-node-running: registry.npmjs.org/why-is-node-running/2.2.2
     transitivePeerDependencies:
       - less

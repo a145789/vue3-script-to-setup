@@ -3,15 +3,17 @@ import { CommandsOption, FileType } from "../constants";
 import transformScript from "./script";
 import { output } from "../utils";
 import MagicString from "magic-string";
+import { parseSync } from "@swc/core";
 
-export function transformSfc(
+function transformSfc(
   sfc: string,
   option: CommandsOption,
-  path = "code",
+  swcParseParseSync = parseSync,
 ) {
   const {
     descriptor: { script, scriptSetup },
   } = parse(sfc);
+  const { path } = option;
 
   if (scriptSetup || !script) {
     output.log(`skip ${path}`);
@@ -20,13 +22,16 @@ export function transformSfc(
 
   let code: string | null = null;
   try {
-    code = transformScript({
-      ...option,
-      fileType: script.lang === "ts" ? FileType.ts : FileType.js,
-      script: script.content.trim(),
-      offset: 0,
-      fileAbsolutePath: path,
-    });
+    code = transformScript(
+      {
+        ...option,
+        fileType: script.lang === "ts" ? FileType.ts : FileType.js,
+        script: script.content.trim(),
+        offset: 0,
+        fileAbsolutePath: path,
+      },
+      swcParseParseSync,
+    );
   } catch (error) {
     output.error(`transform script failed in the ${path}`);
     console.log(error);

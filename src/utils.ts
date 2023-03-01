@@ -17,7 +17,7 @@ import type {
 import { Visitor } from "@swc/core/Visitor.js";
 import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
-import { DefaultOption, SetupAst } from "./constants";
+import type { DefaultOption, SetupAst } from "./constants";
 import type MagicString from "magic-string";
 import { TransformOption } from "./transform/script";
 

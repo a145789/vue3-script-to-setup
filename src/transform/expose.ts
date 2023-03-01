@@ -4,7 +4,7 @@ import {
   getRealSpan,
   getSetupSecondParams,
 } from "../utils";
-import {
+import type {
   BlockStatement,
   ExportDefaultExpression,
   KeyValueProperty,
