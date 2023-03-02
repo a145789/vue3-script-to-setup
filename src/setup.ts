@@ -1,9 +1,11 @@
 import { findUpSync } from "find-up";
-import { getTheFileAbsolutePath, output, useConfigPath } from "./utils";
+import { getTheFileAbsolutePath, useConfigPath } from "./utils";
 import { transformSfc } from "./transform";
 import { CommandsOption } from "./constants";
 import writeFile from "./writeFile";
 import { readFileSync } from "fs";
+import { parseSync } from "@swc/core";
+import { blue, green, red, yellow } from "colorette";
 
 const CONFIG_FILE_NAME = "tosetup.config" as const;
 
@@ -47,8 +49,8 @@ async function setup() {
       `${CONFIG_FILE_NAME}.ts`,
     ]);
     if (!configPath) {
-      output.error(
-        `Please enter a file path or use a ${CONFIG_FILE_NAME} file.`,
+      console.error(
+        red(`Please enter a file path or use a ${CONFIG_FILE_NAME} file.`),
       );
       process.exit(1);
     }
@@ -61,9 +63,17 @@ async function setup() {
   }
 
   for (const path of pathNames) {
+    const output = {
+      warn: (message: string) =>
+        console.log(`${yellow(message)} in the ${path}`),
+      error: (message: string) => console.log(`${red(message)} in the ${path}`),
+      log: (message: string) => console.log(`${blue(message)} in the ${path}`),
+      success: (message: string) =>
+        console.log(`${green(message)} in the ${path}`),
+    };
     output.log(`File ${path} start of transform...`);
     const sfc = readFileSync(path).toString();
-    const code = transformSfc(sfc, { ...commands, path });
+    const code = transformSfc(sfc, { ...commands, parseSync, output });
     if (code) {
       try {
         const file = writeFile(code, path, commands);
@@ -75,7 +85,7 @@ async function setup() {
     }
   }
 
-  output.log(`Done in ${Math.floor(Date.now() - start)}ms.`);
+  console.log(`Done in ${Math.floor(Date.now() - start)}ms.`);
 }
 
 setup();

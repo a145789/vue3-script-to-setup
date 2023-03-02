@@ -10,7 +10,7 @@ import type {
   NamedImportSpecifier,
   ObjectExpression,
 } from "@swc/core";
-import { Config, FileType, SetupAst } from "../constants";
+import { ScriptOptions, FileType, SetupAst } from "../constants";
 import { getPropsValue, getRealSpan, getSpecifierOffset } from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
@@ -18,7 +18,7 @@ import type MagicString from "magic-string";
 function transformProps(
   propsAst: ArrayExpression | Identifier | ObjectExpression,
   setupAst: SetupAst,
-  config: Config,
+  config: ScriptOptions,
 ) {
   const { script, offset, fileType, propsNotOnlyTs } = config;
 

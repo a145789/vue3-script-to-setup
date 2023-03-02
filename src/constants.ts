@@ -23,14 +23,28 @@ export interface DefaultOption {
   };
 }
 
-export type CommandsOption = Omit<DefaultOption, "path"> & { path: string };
-export interface Config {
+export type CommandsOption = Omit<DefaultOption, "path">;
+
+export interface Output {
+  warn(message: string): void;
+  error(message: string): void;
+  log(message: string): void;
+  success(message: string): void;
+}
+
+export interface Handlers {
+  parseSync: ParseSyncType;
+  output: Output;
+}
+
+export type SfcOptions = CommandsOption & Handlers;
+
+export type ScriptOptions = {
   fileType: FileType;
   script: string;
   offset: number;
-  fileAbsolutePath: string;
   propsNotOnlyTs?: boolean;
-}
+} & Handlers;
 
 export const parseOption = {
   target: "es2022",

@@ -4,7 +4,7 @@ import type {
   Identifier,
   ObjectExpression,
 } from "@swc/core";
-import { Config, SetupAst } from "../constants";
+import { ScriptOptions, SetupAst } from "../constants";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 import { getRealSpan } from "../utils";
@@ -12,7 +12,7 @@ import { getRealSpan } from "../utils";
 function transformComponents(
   componentsAst: ArrayExpression | Identifier | ObjectExpression,
   _setupAst: SetupAst,
-  config: Config,
+  config: ScriptOptions,
 ) {
   const { script, offset } = config;
   if (

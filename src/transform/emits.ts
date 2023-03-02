@@ -9,7 +9,7 @@ import type {
   BlockStatement,
 } from "@swc/core";
 
-import { Config, SetupAst } from "../constants";
+import { ScriptOptions, SetupAst } from "../constants";
 import {
   GetCallExpressionFirstArg,
   getRealSpan,
@@ -21,10 +21,10 @@ import type MagicString from "magic-string";
 function transformEmits(
   emitsAst: ArrayExpression | ObjectExpression | Identifier | null,
   setupAst: SetupAst,
-  config: Config,
+  config: ScriptOptions,
 ) {
-  const { script, offset, fileAbsolutePath } = config;
-  const name = getSetupSecondParams("emit", setupAst, fileAbsolutePath);
+  const { script, offset, output } = config;
+  const name = getSetupSecondParams("emit", setupAst, output);
   if (!name) {
     return;
   }

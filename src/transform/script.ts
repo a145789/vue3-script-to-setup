@@ -13,13 +13,12 @@ import type {
   Statement,
 } from "@swc/core";
 
-import { Config, parseOption, ParseSyncType } from "../constants";
+import { ScriptOptions, parseOption } from "../constants";
 import {
   genScriptUnicodeMap,
   getRealSpan,
   getSpecifierOffset,
   MapVisitor,
-  output,
 } from "../utils";
 import transformComponents from "./components";
 import transformDirectives from "./directives";
@@ -61,25 +60,24 @@ export interface TransformOption {
   setup?: ReturnType<typeof transformProps>;
 }
 
-function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
-  const program = swcParseParseSync(config.script, parseOption);
+function transformScript(options: ScriptOptions) {
+  const { parseSync, output } = options;
+  const program = parseSync(options.script, parseOption);
 
   const {
     body,
     span: { start },
   } = program;
 
-  config.offset = start;
-  genScriptUnicodeMap(config.script, start);
+  options.offset = start;
+  genScriptUnicodeMap(options.script, start);
 
   const exportDefaultAst = body.find(
     (item) => item.type === "ExportDefaultExpression",
   ) as { expression: Expression; span: Span };
 
   if (!exportDefaultAst) {
-    output.warn(
-      `The export default cannot be found in the ${config.fileAbsolutePath}`,
-    );
+    output.warn("The export default cannot be found");
     return null;
   }
   let optionAst: ObjectExpression | null = null;
@@ -99,9 +97,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
   }
 
   if (!optionAst) {
-    output.warn(
-      `The options cannot be found in the ${config.fileAbsolutePath}`,
-    );
+    output.warn("The options cannot be found");
     return null;
   }
 
@@ -126,9 +122,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
     return false;
   }) as MethodProperty | KeyValueProperty;
   if (!setupAst) {
-    output.warn(
-      `There is no setup method in options in the ${config.fileAbsolutePath}`,
-    );
+    output.warn("There is no setup method in options");
     return null;
   }
   const setupFnAst =
@@ -139,9 +133,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
   const transformOption: TransformOption = {};
   for (const ast of optionAst.properties) {
     if (ast.type === "SpreadElement") {
-      output.warn(
-        `The Spread syntax(...) cannot be resolved in options in the ${config.fileAbsolutePath}`,
-      );
+      output.warn("The Spread syntax(...) cannot be resolved in options");
       return null;
     }
     if (
@@ -155,11 +147,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
 
     const key = ast.type === "Identifier" ? ast.value : getOptionKey(ast.key);
     if (!key || ILLEGAL_OPTIONS_API.includes(key)) {
-      output.warn(
-        `${ILLEGAL_OPTIONS_API.join()} cannot be parsed in option in the ${
-          config.fileAbsolutePath
-        }`,
-      );
+      output.warn(`${ILLEGAL_OPTIONS_API.join()} cannot be parsed in option`);
       return null;
     }
     try {
@@ -169,7 +157,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
           transformOption.props = transformProps(
             value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
-            config,
+            options,
           );
           break;
         }
@@ -177,7 +165,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
           transformOption.emits = transformEmits(
             value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
-            config,
+            options,
           );
           break;
         }
@@ -185,7 +173,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
           transformOption.components = transformComponents(
             value as ArrayExpression | Identifier | ObjectExpression,
             setupFnAst,
-            config,
+            options,
           );
           break;
         }
@@ -193,7 +181,7 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
           transformOption.directives = transformDirectives(
             value as Identifier | ObjectExpression,
             setupFnAst,
-            config,
+            options,
           );
           break;
         }
@@ -201,25 +189,23 @@ function transformScript(config: Config, swcParseParseSync: ParseSyncType) {
           break;
       }
     } catch (error) {
-      output.error(
-        `Error parsing option item in the ${config.fileAbsolutePath}`,
-      );
+      output.error("Error parsing option item");
       console.log(error);
     }
   }
 
   try {
     if (!transformOption.emits) {
-      transformOption.emits = transformEmits(null, setupFnAst, config);
+      transformOption.emits = transformEmits(null, setupFnAst, options);
     }
-    transformOption.expose = transformExpose(setupFnAst, config);
-    transformOption.attrsAndSlots = transformAttrsAndSlots(setupFnAst, config);
+    transformOption.expose = transformExpose(setupFnAst, options);
+    transformOption.attrsAndSlots = transformAttrsAndSlots(setupFnAst, options);
   } catch (error) {
-    output.error(`Error parsing option item in the ${config.fileAbsolutePath}`);
+    output.error("Error parsing option item");
     console.log(error);
   }
 
-  const { script, offset } = config;
+  const { script, offset } = options;
   class SetupVisitor extends Visitor {
     ms: MagicString;
     exportDefaultExpressionSpan = {

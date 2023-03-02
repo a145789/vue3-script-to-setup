@@ -5,8 +5,8 @@ import type {
   NamedImportSpecifier,
   ObjectExpression,
 } from "@swc/core";
-import { Config, SetupAst } from "../constants";
-import { getRealSpan, output } from "../utils";
+import { ScriptOptions, SetupAst } from "../constants";
+import { getRealSpan } from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
@@ -17,16 +17,14 @@ function transformDirectiveName(name: string) {
 function transformDirectives(
   directivesAst: Identifier | ObjectExpression,
   _setupAst: SetupAst,
-  config: Config,
+  config: ScriptOptions,
 ) {
-  const { script, offset, fileAbsolutePath } = config;
+  const { script, offset, output } = config;
   if (
     directivesAst.type === "Identifier" ||
     directivesAst.properties.some((ast) => ast.type === "SpreadElement")
   ) {
-    output.warn(
-      `Please manually modify the custom directives in ${fileAbsolutePath}.`,
-    );
+    output.warn("Please manually modify the custom directives");
     return;
   }
 

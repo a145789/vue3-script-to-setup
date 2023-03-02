@@ -15,11 +15,10 @@ import type {
   TsTypeReference,
 } from "@swc/core";
 import { Visitor } from "@swc/core/Visitor.js";
-import { blue, green, red, yellow } from "colorette";
 import slash from "slash";
-import type { DefaultOption, SetupAst } from "./constants";
+import type { DefaultOption, Output, SetupAst } from "./constants";
 import type MagicString from "magic-string";
-import { TransformOption } from "./transform/script";
+import type { TransformOption } from "./transform/script";
 
 export const cwd = process.cwd();
 
@@ -37,7 +36,7 @@ export function getTheFileAbsolutePath(...pathNames: string[]) {
     fs.accessSync(absolutePath, fs.constants.F_OK);
     return absolutePath;
   } catch {
-    output.warn(`File ${absolutePath} cannot be accessed.`);
+    console.warn(`File ${absolutePath} cannot be accessed`);
     return;
   }
 }
@@ -132,7 +131,7 @@ export function getPropsValue(
 export function getSetupSecondParams(
   key: "attrs" | "slots" | "emit" | "expose",
   setupAst: SetupAst,
-  fileAbsolutePath: string,
+  output: Output,
 ) {
   if (!(setupAst.params.length || setupAst.params[1])) {
     return;
@@ -149,7 +148,7 @@ export function getSetupSecondParams(
     setupParamsAst.type !== "Parameter"
   ) {
     output.warn(
-      `The second argument to the setup function is not an object and cannot be resolved in the ${fileAbsolutePath}`,
+      "The second argument to the setup function is not an object and cannot be resolved",
     );
     return;
   }
@@ -161,7 +160,7 @@ export function getSetupSecondParams(
 
   if (properties.some((ast) => ast.type === "RestElement")) {
     output.warn(
-      `The second argument to the setup function has rest element(...rest) and cannot be resolved in the ${fileAbsolutePath}`,
+      "The second argument to the setup function has rest element(...rest) and cannot be resolved",
     );
     return;
   }
@@ -245,13 +244,6 @@ export class GetCallExpressionFirstArg extends Visitor {
     return n;
   }
 }
-
-export const output = {
-  warn: (message: string) => console.log(yellow(message)),
-  error: (message: string) => console.log(red(message)),
-  log: (message: string) => console.log(blue(message)),
-  success: (message: string) => console.log(green(message)),
-};
 
 export function getSpecifierOffset(
   n: ImportDeclaration,

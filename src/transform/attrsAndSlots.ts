@@ -3,17 +3,17 @@ import type {
   ImportDeclaration,
   ImportSpecifier,
 } from "@swc/core";
-import { Config, SetupAst } from "../constants";
+import { ScriptOptions, SetupAst } from "../constants";
 import { getRealSpan, getSetupSecondParams } from "../utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
 function transformAttrsAndSlots(
   setupAst: SetupAst,
-  { offset, fileAbsolutePath }: Config,
+  { offset, output }: ScriptOptions,
 ) {
-  const attrsName = getSetupSecondParams("attrs", setupAst, fileAbsolutePath);
-  const slotsName = getSetupSecondParams("slots", setupAst, fileAbsolutePath);
+  const attrsName = getSetupSecondParams("attrs", setupAst, output);
+  const slotsName = getSetupSecondParams("slots", setupAst, output);
   if (!(attrsName || slotsName)) {
     return;
   }

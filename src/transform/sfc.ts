@@ -1,39 +1,30 @@
 import { parse } from "vue/compiler-sfc";
-import { CommandsOption, FileType } from "../constants";
+import { SfcOptions, FileType } from "../constants";
 import transformScript from "./script";
-import { output } from "../utils";
 import MagicString from "magic-string";
-import { parseSync } from "@swc/core";
 
-function transformSfc(
-  sfc: string,
-  option: CommandsOption,
-  swcParseParseSync = parseSync,
-) {
+function transformSfc(sfc: string, options: SfcOptions) {
   const {
     descriptor: { script, scriptSetup },
   } = parse(sfc);
-  const { path } = option;
+
+  const { output } = options;
 
   if (scriptSetup || !script) {
-    output.log(`skip ${path}`);
+    output.log("Cannot find the code to be transform");
     return null;
   }
 
   let code: string | null = null;
   try {
-    code = transformScript(
-      {
-        ...option,
-        fileType: script.lang === "ts" ? FileType.ts : FileType.js,
-        script: script.content.trim(),
-        offset: 0,
-        fileAbsolutePath: path,
-      },
-      swcParseParseSync,
-    );
+    code = transformScript({
+      ...options,
+      fileType: script.lang === "ts" ? FileType.ts : FileType.js,
+      script: script.content.trim(),
+      offset: 0,
+    });
   } catch (error) {
-    output.error(`transform script failed in the ${path}`);
+    output.error("transform script failed");
     console.log(error);
   } finally {
     if (code) {
@@ -46,7 +37,7 @@ function transformSfc(
 
       return ms.toString();
     } else {
-      output.error(`File ${path} transform failure.\n`);
+      output.error("transform failure");
       return null;
     }
   }

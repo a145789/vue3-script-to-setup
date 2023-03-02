@@ -8,7 +8,7 @@ import {
   getRealSpan,
 } from "../src/utils";
 import fg from "fast-glob";
-import { FileType } from "../src/constants";
+import { FileType, Output } from "../src/constants";
 import {
   testScript1,
   testScript2,
@@ -17,6 +17,13 @@ import {
 } from "./utils";
 import transformScript from "../src/transform/script";
 import { parseSync } from "@swc/core";
+
+const output: Output = {
+  warn() {},
+  log() {},
+  success() {},
+  error() {},
+};
 
 describe("test utils", () => {
   it("test getTheFileAbsolutePath", () => {
@@ -82,43 +89,37 @@ describe("test transform script", () => {
   it("test", async () => {
     expect(
       transformToSingeLine(
-        transformScript(
-          {
-            fileType: FileType.ts,
-            script: testScript1.code.trim(),
-            offset: 0,
-            fileAbsolutePath: "",
-          },
+        transformScript({
+          fileType: FileType.ts,
+          script: testScript1.code.trim(),
+          offset: 0,
           parseSync,
-        ),
+          output,
+        }),
       ),
     ).toBe(transformToSingeLine(testScript1.transform.trim()));
 
     expect(
       transformToSingeLine(
-        transformScript(
-          {
-            fileType: FileType.ts,
-            script: testScript2.code.trim(),
-            offset: 0,
-            fileAbsolutePath: "",
-          },
+        transformScript({
+          fileType: FileType.ts,
+          script: testScript2.code.trim(),
+          offset: 0,
           parseSync,
-        ),
+          output,
+        }),
       ),
     ).toBe(transformToSingeLine(testScript2.transform.trim()));
 
     expect(
       transformToSingeLine(
-        transformScript(
-          {
-            fileType: FileType.ts,
-            script: testScript3.code.trim(),
-            offset: 0,
-            fileAbsolutePath: "",
-          },
+        transformScript({
+          fileType: FileType.ts,
+          script: testScript3.code.trim(),
+          offset: 0,
           parseSync,
-        ),
+          output,
+        }),
       ),
     ).toBe(transformToSingeLine(testScript3.transform.trim()));
   });

@@ -1,4 +1,4 @@
-import { Config, SetupAst } from "../constants";
+import { ScriptOptions, SetupAst } from "../constants";
 import {
   GetCallExpressionFirstArg,
   getRealSpan,
@@ -14,9 +14,9 @@ import type {
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 
-function transformExpose(setupAst: SetupAst, config: Config) {
-  const { script, offset, fileAbsolutePath } = config;
-  const name = getSetupSecondParams("expose", setupAst, fileAbsolutePath);
+function transformExpose(setupAst: SetupAst, config: ScriptOptions) {
+  const { script, offset, output } = config;
+  const name = getSetupSecondParams("expose", setupAst, output);
   if (!name) {
     return;
   }
