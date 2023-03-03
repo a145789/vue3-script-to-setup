@@ -7,7 +7,7 @@ import type {
 import { ScriptOptions, SetupAst } from "../constants";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
-import { getRealSpan } from "../utils";
+import { getRealSpan } from "./utils";
 
 function transformComponents(
   componentsAst: ArrayExpression | Identifier | ObjectExpression,

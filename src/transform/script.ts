@@ -19,7 +19,7 @@ import {
   getRealSpan,
   getSpecifierOffset,
   MapVisitor,
-} from "../utils";
+} from "./utils";
 import transformComponents from "./components";
 import transformDirectives from "./directives";
 import transformEmits from "./emits";

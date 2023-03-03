@@ -4,7 +4,7 @@ import { parseSync } from "@swc/core";
 
 export type ParseSyncType = typeof parseSync;
 
-export const enum FileType {
+export enum FileType {
   js,
   ts,
 }

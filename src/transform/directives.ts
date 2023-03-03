@@ -6,7 +6,7 @@ import type {
   ObjectExpression,
 } from "@swc/core";
 import { ScriptOptions, SetupAst } from "../constants";
-import { getRealSpan } from "../utils";
+import { getRealSpan } from "./utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 

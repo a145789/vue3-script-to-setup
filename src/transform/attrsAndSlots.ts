@@ -4,7 +4,7 @@ import type {
   ImportSpecifier,
 } from "@swc/core";
 import { ScriptOptions, SetupAst } from "../constants";
-import { getRealSpan, getSetupSecondParams } from "../utils";
+import { getRealSpan, getSetupSecondParams } from "./utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 

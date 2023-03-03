@@ -3,7 +3,7 @@ import {
   GetCallExpressionFirstArg,
   getRealSpan,
   getSetupSecondParams,
-} from "../utils";
+} from "./utils";
 import type {
   BlockStatement,
   ExportDefaultExpression,

@@ -11,7 +11,7 @@ import type {
   ObjectExpression,
 } from "@swc/core";
 import { ScriptOptions, FileType, SetupAst } from "../constants";
-import { getPropsValue, getRealSpan, getSpecifierOffset } from "../utils";
+import { getPropsValue, getRealSpan, getSpecifierOffset } from "./utils";
 import { Visitor } from "@swc/core/Visitor.js";
 import type MagicString from "magic-string";
 

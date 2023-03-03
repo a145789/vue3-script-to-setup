@@ -4,8 +4,6 @@ import {
   pathResolve,
   getTheFileAbsolutePath,
   useConfigPath,
-  genScriptUnicodeMap,
-  getRealSpan,
 } from "../src/utils";
 import fg from "fast-glob";
 import { FileType, Output } from "../src/constants";
@@ -17,6 +15,7 @@ import {
 } from "./utils";
 import transformScript from "../src/transform/script";
 import { parseSync } from "@swc/core";
+import { genScriptUnicodeMap, getRealSpan } from "../src/transform/utils";
 
 const output: Output = {
   warn() {},
