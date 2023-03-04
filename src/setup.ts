@@ -13,10 +13,7 @@ async function setup() {
   const start = Date.now();
   const argv = process.argv.slice(2).filter(Boolean);
 
-  let { pathNames, commands } = argv.reduce<{
-    pathNames: string[];
-    commands: CommandsOption;
-  }>(
+  let { pathNames, commands } = argv.reduce(
     (p, c) => {
       if (c.startsWith("--")) {
         switch (c.split("--")[1] as keyof typeof p.commands) {
@@ -40,7 +37,7 @@ async function setup() {
 
       return p;
     },
-    { pathNames: [], commands: {} },
+    { pathNames: [] as string[], commands: {} as CommandsOption },
   );
 
   if (!pathNames.length) {

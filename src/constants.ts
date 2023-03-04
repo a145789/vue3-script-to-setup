@@ -37,7 +37,7 @@ export interface Handlers {
   output: Output;
 }
 
-export type SfcOptions = CommandsOption & Handlers;
+export type SfcOptions = Pick<CommandsOption, "propsNotOnlyTs"> & Handlers;
 
 export type ScriptOptions = {
   fileType: FileType;
