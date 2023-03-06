@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.5...v0.2.0) (2023-03-06)
+
+
+### Features
+
+* exposing transformSfc transformScript to the outside ([7a10cb2](https://github.com/a145789/vue3-script-to-setup/commit/7a10cb2f1613e83d0d39cce26637fd46218f086a))
+* Improvement api ([c20d095](https://github.com/a145789/vue3-script-to-setup/commit/c20d095a14e27974cf5f62ee2891dc24c742938d))
+* **playground:** playground ([7456e49](https://github.com/a145789/vue3-script-to-setup/commit/7456e493ed5ade07f781d30ddabbd6d3aba398c0))
+* **playground:** playground base ([a39c99c](https://github.com/a145789/vue3-script-to-setup/commit/a39c99ce8170b7141e146284d44e58c5f6ef892b))
+
 ### [0.1.5](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.4...v0.1.5) (2023-01-04)
 
 
