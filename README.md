@@ -7,7 +7,7 @@
 <p align="center">Quickly transform your vue3 script to setup mode</p>
 <p align="center">快速将 vue3 script 转换为 setup 模式</p>
 <p align="center">
-  <a href="https://a145789.github.io/vue3-script-to-setup/" target="_blank">
+  <a href="https://a145789.github.io/vue3-script-to-setup/#code=PHNjcmlwdCBsYW5nPSJ0cyI%2BDQppbXBvcnQgeyBkZWZpbmVDb21wb25lbnQsIFByb3BUeXBlLCByZWYgfSBmcm9tICJ2dWUiDQppbXBvcnQgSGVhZGVyIGZyb20gIi4uL2NvbXBvbmVudHMvSGVhZGVyLnZ1ZSINCmltcG9ydCBUYWIgZnJvbSAiLi4vY29tcG9uZW50cy9UYWIudnVlIg0KaW1wb3J0IHRvdWNoZGlyIGZyb20gInZ0b3VjaGRpciINCmV4cG9ydCBkZWZhdWx0IGRlZmluZUNvbXBvbmVudCh7DQogIG5hbWU6ICdBcHAnLA0KICBjb21wb25lbnRzOiB7DQogICAgSGVhZGVyLA0KICAgIFRhYiwNCiAgfSwNCiAgZGlyZWN0aXZlczogew0KICAgIGZvcmNlOiB7fSwNCiAgICB0b3VjaGRpciwNCiAgfSwNCiAgcHJvcHM6IHsNCiAgICBpdGVtczogQXJyYXkgYXMgUHJvcFR5cGU8bnVtYmVyW10%2BDQogIH0sDQogIGVtaXQ6IFsiY2xpY2siXSwNCiAgc2V0dXAocHJvcHMsIHsgZW1pdCwgYXR0cnMsIHNsb3RzOiBteVNsb3RzLCBleHBvc2UgfSkgew0KICAgIGNvbnN0IGJhciA9IHJlZigwKQ0KICAgIGV4cG9zZSh7IGJhciB9KQ0KICAgIGVtaXQoImNoYW5nZSIpOw0KICAgIHJldHVybiB7DQogICAgICBiYXINCiAgICB9DQogIH0NCn0pDQo8L3NjcmlwdD4NCg0KPHRlbXBsYXRlPg0KICA8ZGl2PkFwcDwvZGl2Pg0KPC90ZW1wbGF0ZT4%3D&codeType=sfc&propsNotOnlyTs=0" target="_blank">
     Playground 在线尝试
   </a>
 </p>
