@@ -6,6 +6,11 @@
 </p>
 <p align="center">Quickly transform your vue3 script to setup mode</p>
 <p align="center">快速将 vue3 script 转换为 setup 模式</p>
+<p align="center">
+  <a href="https://a145789.github.io/vue3-script-to-setup/" target="_blank">
+    Playground 在线尝试
+  </a>
+</p>
 
 **origin code**
 ```html

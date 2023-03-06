@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
     );
   }
   return {
+    base: "./",
     plugins,
     resolve: {
       alias: {
