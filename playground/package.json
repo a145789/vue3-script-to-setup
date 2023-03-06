@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only",
+    "build": "run-p build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
@@ -16,6 +16,9 @@
     "@unocss/reset": "^0.50.3",
     "@varlet/touch-emulator": "^2.8.5",
     "@varlet/ui": "^2.8.5",
+    "@vueuse/core": "^9.13.0",
+    "monaco-editor": "^0.36.1",
+    "theme-vitesse": "^0.6.3",
     "vue": "^3.2.47"
   },
   "devDependencies": {

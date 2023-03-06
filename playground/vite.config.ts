@@ -14,12 +14,20 @@ export default defineConfig(({ mode }) => {
   const plugins: PluginOption[] = [
     vue(),
     vueJsx(),
-    Unocss(),
+    Unocss({
+      safelist: ["text-#444", "dark:text-#ddd"],
+      theme: {
+        breakpoints: {
+          sm: "768px",
+        },
+      },
+    }),
     AutoImport({
       imports: ["vue", "vue-router"],
-      dts: "./src/auto-imports.d.ts",
+      dirs: ["./src/composables", "./src/constants"],
+      dts: true,
       vueTemplate: true,
-      resolvers: [VarletUIResolver()],
+      resolvers: [VarletUIResolver({ autoImport: true })],
     }),
     Components({
       dirs: ["src/components"],
@@ -27,7 +35,7 @@ export default defineConfig(({ mode }) => {
       extensions: ["vue"],
       // allow auto import and register components used in markdown
       include: [/\.vue$/, /\.vue\?vue/],
-      dts: "./src/auto-components.d.ts",
+      dts: true,
       resolvers: [VarletUIResolver({ autoImport: true })],
     }),
   ];
