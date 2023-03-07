@@ -1,0 +1,37 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  # Trigger only when commit message contains 'playground'
+  if: "contains(github.event.head_commit.message, 'playground')"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install and Build 🔧
+        run: |
+          # Install pnpm
+          npm install -g pnpm
+          # Update dependencies using pnpm
+          pnpm install --no-frozen-lockfile
+          # Enter playground directory and run build command
+          cd playground && pnpm run build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: playground/dist # The folder the action should deploy.
+          ACCESS_TOKEN: ${{secrets.GITHUB_TOKEN}}
