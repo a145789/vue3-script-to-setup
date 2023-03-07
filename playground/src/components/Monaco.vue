@@ -28,6 +28,13 @@ function setValue(value: string) {
   editor.value?.setValue(value)
 }
 
+watch([() => props.language, editor], ([language, editor]) => {
+  if (!editor?.getModel()) {
+    return
+  }
+  monaco.editor.setModelLanguage(editor.getModel()!, language);
+})
+
 onUnmounted(() => {
   editor.value?.dispose();
 });

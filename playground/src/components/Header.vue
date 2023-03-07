@@ -38,7 +38,7 @@ const iconClass = 'text-#555 dark:text-#fff'
 </script>
 
 <template>
-  <var-paper :elevation="2" :height="50" class="px-25px">
+  <var-paper :elevation="2" :height="50" class="px-30px">
     <var-row align="center" justify="space-between" class="h-full">
       <var-col :span="12" :xs="20">
         <div class="font-500 text-20px" :class="TEXT_COLOR">Vue3 script to script-setup</div>
