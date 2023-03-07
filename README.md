@@ -230,3 +230,7 @@ export default defineComponent({
   }
 })
 ```
+
+## License
+
+[MIT](https://github.com/a145789/vue3-script-to-setup/blob/main/LICENSE)
