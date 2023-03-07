@@ -20,7 +20,7 @@ const output = {
 const code = useTransform(codeType, computed(() => atou(originCode.value)), computed(() => Boolean(Number(propsNotOnlyTs.value))), output)
 
 const language = computed(() => {
-  return codeType.value === 'sfc' ? 'html' : 'javascript'
+  return codeType.value === 'sfc' ? 'html' : 'typescript'
 })
 
 const { copy } = useClipboard()

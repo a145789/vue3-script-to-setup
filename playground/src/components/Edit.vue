@@ -18,7 +18,7 @@ watch(() => codeType.value, () => {
 })
 
 const language = computed(() => {
-  return codeType.value === 'sfc' ? 'html' : 'javascript'
+  return codeType.value === 'sfc' ? 'html' : 'typescript'
 })
 </script>
 
