@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/a145789/vue3-script-to-setup/compare/v0.2.1...v0.2.2) (2023-06-19)
+
+
+### Bug Fixes
+
+* **playground:** fix language change ([f6d48da](https://github.com/a145789/vue3-script-to-setup/commit/f6d48da98886f0a086cf94e15db257803b3d9f2f))
+
 ### [0.2.1](https://github.com/a145789/vue3-script-to-setup/compare/v0.2.0...v0.2.1) (2023-03-06)
 
 ## [0.2.0](https://github.com/a145789/vue3-script-to-setup/compare/v0.1.5...v0.2.0) (2023-03-06)
