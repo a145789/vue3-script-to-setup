@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    if: "contains(github.event.head_commit.message, 'playground')"
+    if: 'contains(github.event.head_commit.message, "playground") || contains(github.event.head_commit.message, "all")'
     runs-on: ubuntu-latest
 
     steps:
@@ -33,4 +33,5 @@ jobs:
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: playground/dist # The folder the action should deploy.
+        env:
           ACCESS_TOKEN: ${{secrets.GITHUB_TOKEN}}
