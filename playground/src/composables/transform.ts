@@ -6,11 +6,12 @@ import {
 } from "../../../src/index";
 import initSwc, { parseSync } from "@swc/wasm-web";
 import type { CodeType } from "@/constants";
+import type { MaybeRefOrGetter } from "vue";
 
 export function useTransform(
-  type: Ref<CodeType>,
-  originCode: ComputedRef<string>,
-  propsNotOnlyTs: Ref<boolean>,
+  type: MaybeRefOrGetter<CodeType>,
+  originCode: MaybeRefOrGetter<string>,
+  propsNotOnlyTs: MaybeRefOrGetter<boolean>,
   output: Output,
 ) {
   const isReady = ref(false);
@@ -21,26 +22,26 @@ export function useTransform(
 
   const code = ref("");
   watchEffect(() => {
-    if (!(isReady.value && originCode.value)) {
+    if (!(isReady.value && toValue(originCode))) {
       code.value = "";
       return;
     }
 
-    const text = originCode.value.trim();
+    const text = toValue(originCode).trim();
     try {
-      if (type.value === "sfc") {
+      if (toValue(type) === "sfc") {
         code.value =
           transformSfc(text, {
             parseSync: parseSync as any,
             output,
-            propsNotOnlyTs: propsNotOnlyTs.value,
+            propsNotOnlyTs: toValue(propsNotOnlyTs),
           }) || "";
       } else {
         code.value =
           transformScript({
             fileType: FileType.ts,
             script: text,
-            propsNotOnlyTs: propsNotOnlyTs.value,
+            propsNotOnlyTs: toValue(propsNotOnlyTs),
             output,
             parseSync: parseSync as any,
             offset: 0,
