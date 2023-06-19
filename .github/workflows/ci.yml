@@ -24,12 +24,15 @@ jobs:
         with:
           node-version: 16.x
           cache: pnpm
+      
+      - name: Ls
+        run: ls -a
 
       - name: Setup
         run: npm i -g @antfu/ni
 
       - name: Install
-        run: nci
+        run: ni --frozen
 
       - name: Lint
         run: nr lint
@@ -53,7 +56,7 @@ jobs:
         run: npm i -g @antfu/ni
 
       - name: Install
-        run: nci
+        run: ni --frozen
 
       - name: Typecheck
         run: nr typecheck
@@ -84,7 +87,7 @@ jobs:
         run: npm i -g @antfu/ni
 
       - name: Install
-        run: nci
+        run: ni --frozen
 
       - name: Build
         run: nr build
